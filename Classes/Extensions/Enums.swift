@@ -34,7 +34,7 @@ public extension GZFlingView {
             
         }
         
-        var description:String{
+        public var description:String{
             get{
                 
                 switch self {
