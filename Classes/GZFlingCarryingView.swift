@@ -35,7 +35,7 @@ public extension GZFlingView {
         }
         
         
-        init(customView:UIView!) {
+        public init(customView:UIView!) {
             super.init()
             
             self.customView = customView
@@ -43,16 +43,16 @@ public extension GZFlingView {
             
         }
         
-        override init(frame: CGRect) {
+        public override init(frame: CGRect) {
             super.init(frame: frame)
             
         }
         
-        required init(coder aDecoder: NSCoder) {
+        public required init(coder aDecoder: NSCoder) {
             super.init()
         }
         
-        override func layoutSubviews() {
+        public override func layoutSubviews() {
             super.layoutSubviews()
             
             //        println("layoutSubviews")
