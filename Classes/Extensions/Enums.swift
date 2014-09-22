@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Grady Zhuo. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
 typealias GZFlingViewAnimationType = GZFlingView.AnimationType
