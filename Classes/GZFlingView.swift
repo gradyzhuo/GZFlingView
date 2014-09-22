@@ -15,7 +15,7 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     /**
         (readonly)
     */
-      var topCarryingView : GZFlingCarryingView!{
+    public  var topCarryingView : GZFlingCarryingView!{
         get{
             return self.nodesQueue.currentNode!.carryingView
         }
@@ -24,7 +24,7 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     /**
         (readonly)
     */
-     var nextCarryingView : GZFlingCarryingView!{
+    public var nextCarryingView : GZFlingCarryingView!{
         get{
             return self.nodesQueue.currentNode!.nextNode!.carryingView
         }
@@ -33,16 +33,16 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     /**
         (readonly)
     */
-    var direction:GZFlingViewSwipingDirection{
+    public var direction:GZFlingViewSwipingDirection{
         get{
             return PrivateInstance.direction
         }
     }
     
-    @IBOutlet  var dataSource: AnyObject?
-    @IBOutlet  var delegate: AnyObject?
+    @IBOutlet public var dataSource: AnyObject?
+    @IBOutlet public var delegate: AnyObject?
     
-    var isEnded:Bool{
+    public var isEnded:Bool{
         get{
             return PrivateInstance.arriveEnd || PrivateInstance.overEnd
         }
