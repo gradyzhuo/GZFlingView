@@ -11,9 +11,9 @@ import UIKit
 public typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
 public typealias GZFlingViewAnimationType = GZFlingView.AnimationType
 
-extension GZFlingView {
+public extension GZFlingView {
     
-    enum SwipingDirection:Int{
+    public enum SwipingDirection:Int{
         
         case Left = 0
         case Right = 1
@@ -49,7 +49,7 @@ extension GZFlingView {
     }
     
     
-    enum AnimationType:Int {
+    public enum AnimationType:Int {
         case None
         case Tinder
         
