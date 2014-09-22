@@ -78,7 +78,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/gradyzhuo/GZFlingView.git" }
+  s.source       = { :git => "https://github.com/gradyzhuo/GZFlingView.git", :tag => "0.0.1"}
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
