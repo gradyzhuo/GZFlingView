@@ -8,7 +8,7 @@
 
 import UIKit
 
-extension CGPoint{
+internal extension CGPoint{
     
     var distance:CGFloat{
         get{
@@ -44,7 +44,5 @@ extension CGPoint{
     func velocityByTimeInterval(timeInterval:NSTimeInterval) -> CGFloat {
         return (self.distance/CGFloat(timeInterval))
     }
-    
-    
     
 }
