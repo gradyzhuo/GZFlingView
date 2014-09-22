@@ -50,29 +50,26 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     private var nodesQueue = GZFlingNodesQueue()
     private var swipingAnimationType:GZFlingViewAnimationType = .Tinder
     
+    //MARK: - Public Methods
     
-    override init() {
+    
+    public override init() {
         super.init()
         self.initialize()
     }
     
-    required public init(coder aDecoder: NSCoder) {
+    public required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initialize()
     }
     
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         
         self.initialize()
     }
     
-    func initialize(){
-        self.prepareGestures()
-        PrivateInstance.beginLocation = self.bounds.center
-    }
-    
-    override public func layoutSubviews() {
+    public override func layoutSubviews() {
         super.layoutSubviews()
         
         if self.nodesQueue.size == 0 {
@@ -92,28 +89,64 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
                     
                     carryingView.frame = self.bounds
                     carryingView.flingIndex = index
-//                    var delegate = self.delegate as GZFlingViewDelegate
-//                    
-//                    if delegate.respondsToSelector("flingView:willShowCarryingView:atFlingIndex:") {
-//                        self.delegate?.flingView!(self, willShowCarryingView: carryingView, atFlingIndex: PrivateInstance.counter)
-//                    }
+                    //                    var delegate = self.delegate as GZFlingViewDelegate
+                    //
+                    //                    if delegate.respondsToSelector("flingView:willShowCarryingView:atFlingIndex:") {
+                    //                        self.delegate?.flingView!(self, willShowCarryingView: carryingView, atFlingIndex: PrivateInstance.counter)
+                    //                    }
                     self.askDelegateForNeedShow(self.delegate as GZFlingViewDelegate, forCarryingView: carryingView, atIndex: index)
                     
                     
                     self.nodesQueue += GZFlingNode(carryingView: carryingView)
                     
                 }
-
+                
                 PrivateInstance.counter++
                 
             }
-
+            
             self.tellDelegateDidShow(carryingView: self.nodesQueue.frontNode.carryingView, atFlingIndex: 0)
             
         }
         
     }
+
     
+    public func choose(direction:GZFlingViewSwipingDirection){
+        
+        if PrivateInstance.overEnd  {
+            return
+        }
+        
+        PrivateInstance.gestruBeginReset()
+        
+        var translation:CGPoint?
+        switch direction {
+            
+        case .Left:
+            translation = CGPoint(x: -100, y: 50)
+            
+        case .Right:
+            translation = CGPoint(x: 100, y: -50)
+            
+        case .Undefined:
+            translation = CGPoint(x: 0, y: 0)
+            
+        }
+        
+        PrivateInstance.direction = direction
+        self.showChoosenAnimation(direction, translation: translation!)
+        
+        
+        
+    }
+    
+    // MARK: - Private Methods
+    
+    func initialize(){
+        self.prepareGestures()
+        PrivateInstance.beginLocation = self.bounds.center
+    }
     
     func tellDelegateWillShow(#carryingView:GZFlingCarryingView, atFlingIndex index:Int){
         
@@ -152,8 +185,6 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
         
     }
     
-    
-    
     func askDelegateForNeedShow(delegate:GZFlingViewDelegate, forCarryingView carryView:GZFlingCarryingView, atIndex index:Int){
         
         var selectorForCheck = Selector("flingView:shouldNeedShowCarryingViewAtFlingIndex:")
@@ -189,36 +220,6 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
         var panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "viewDidPan:")
         panGestureRecognizer.delegate = self
         self.addGestureRecognizer(panGestureRecognizer)
-    }
-    
-    
-     func choose(direction:GZFlingViewSwipingDirection){
-        
-        if PrivateInstance.overEnd  {
-            return
-        }
-        
-        PrivateInstance.gestruBeginReset()
-        
-        var translation:CGPoint?
-        switch direction {
-            
-        case .Left:
-            translation = CGPoint(x: -100, y: 50)
-            
-        case .Right:
-            translation = CGPoint(x: 100, y: -50)
-            
-        case .Undefined:
-            translation = CGPoint(x: 0, y: 0)
-            
-        }
-        
-        PrivateInstance.direction = direction
-        self.showChoosenAnimation(direction, translation: translation!)
-        
-        
-        
     }
     
     
