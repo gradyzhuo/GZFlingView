@@ -10,9 +10,9 @@ import UIKit
 
 typealias GZFlingCarryingView = GZFlingView.CarryingView
 
-extension GZFlingView {
+public extension GZFlingView {
     
-    class CarryingView: UIView {
+    public class CarryingView: UIView {
         
         var flingIndex:Int = 0
         
