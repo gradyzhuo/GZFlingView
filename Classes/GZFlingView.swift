@@ -8,6 +8,7 @@
 
 import UIKit
 
+@objc(GZFlingView)
 public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     
     //MARK: - Properties Declare
