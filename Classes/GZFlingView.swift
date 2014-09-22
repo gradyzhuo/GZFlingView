@@ -8,7 +8,7 @@
 
 import UIKit
 
- class GZFlingView: UIView, UIGestureRecognizerDelegate {
+public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     
     //MARK: - Properties Declare
     /**
@@ -56,7 +56,7 @@ import UIKit
         self.initialize()
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initialize()
     }
@@ -72,7 +72,7 @@ import UIKit
         PrivateInstance.beginLocation = self.bounds.center
     }
     
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         
         if self.nodesQueue.size == 0 {
@@ -357,7 +357,7 @@ import UIKit
     //MARK: Gesture Recognizer Delegate
     
     
-    override  func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+    override public func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
         return !PrivateInstance.overEnd  && self.dataSource != nil
     }
     
