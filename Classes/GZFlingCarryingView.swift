@@ -14,9 +14,9 @@ public extension GZFlingView {
     
     public class CarryingView: UIView {
         
-        var flingIndex:Int = 0
+        public var flingIndex:Int = 0
         
-        var customView:UIView = UIView() {
+        public var customView:UIView = UIView() {
             willSet{
                 
                 if (newValue != customView) {
