@@ -52,7 +52,6 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     
     //MARK: - Public Methods
     
-    
     public override init() {
         super.init()
         self.initialize()
