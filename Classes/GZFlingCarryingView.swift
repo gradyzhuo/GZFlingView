@@ -8,7 +8,7 @@
 
 import UIKit
 
-typealias GZFlingCarryingView = GZFlingView.CarryingView
+public typealias GZFlingCarryingView = GZFlingView.CarryingView
 
 public extension GZFlingView {
     
