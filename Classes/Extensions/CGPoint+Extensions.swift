@@ -8,7 +8,7 @@
 
 import UIKit
 
-internal extension CGPoint{
+public extension CGPoint{
     
     var distance:CGFloat{
         get{
