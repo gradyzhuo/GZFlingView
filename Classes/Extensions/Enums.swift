@@ -8,8 +8,8 @@
 
 import UIKit
 
-typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
-typealias GZFlingViewAnimationType = GZFlingView.AnimationType
+public typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
+public typealias GZFlingViewAnimationType = GZFlingView.AnimationType
 
 extension GZFlingView {
     
