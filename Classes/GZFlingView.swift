@@ -400,7 +400,7 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     }
 }
 
-@objc protocol GZFlingViewDelegate : NSObjectProtocol {
+@objc public protocol GZFlingViewDelegate : NSObjectProtocol {
     optional func flingView(flingView:GZFlingView, didChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     optional func flingView(flingView:GZFlingView, didCancelChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     
@@ -417,7 +417,7 @@ public class GZFlingView: UIView, UIGestureRecognizerDelegate {
     
 }
 
-@objc protocol GZFlingViewDatasource : NSObjectProtocol{
+@objc public protocol GZFlingViewDatasource : NSObjectProtocol{
     func numberOfCarryingViewsForReusingInFlingView(flingView:GZFlingView) -> Int
     func flingView(flingView:GZFlingView, carryingViewForReusingAtIndex reuseIndex:Int) -> GZFlingCarryingView
 }
