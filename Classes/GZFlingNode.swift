@@ -10,18 +10,20 @@ import Foundation
 
 typealias GZFlingNodesQueue = GZFlingNode.LoopQueue
 
-class GZFlingNode:NSObject,NSCopying {
+class GZFlingNode : NSObject, NSCopying {
     
     // MARK: SubClass Define
     
     class LoopQueue{
         
+        private var privateQueueInstance:PrivateQueueInstance
+        
         /**
             (readonly)
         */
-        var frontNode:GZFlingNode!{
+        internal var frontNode:GZFlingNode!{
             get{
-                return PrivateQueueInstance.frontNode
+                return self.privateQueueInstance.frontNode
             }
             
         }
@@ -29,18 +31,18 @@ class GZFlingNode:NSObject,NSCopying {
         /**
             (readonly)
         */
-        var rearNode:GZFlingNode!{
+        internal var rearNode:GZFlingNode!{
             get{
-                return PrivateQueueInstance.rearNode
+                return self.privateQueueInstance.rearNode
             }
         }
         
         /**
             (readonly)
         */
-        var currentNode:GZFlingNode!{
+        internal var currentNode:GZFlingNode!{
             get{
-                return PrivateQueueInstance.currentNode
+                return self.privateQueueInstance.currentNode
             }
         }
         
@@ -57,24 +59,29 @@ class GZFlingNode:NSObject,NSCopying {
         /**
             (readonly)
         */
-        var size:Int{
+        internal var size:Int{
             get{
-                return PrivateQueueInstance.size
+                return self.privateQueueInstance.size
             }
         }
         
+        
+        
         init(){
-            PrivateQueueInstance.size = 0
+            
+            self.privateQueueInstance = PrivateQueueInstance()
             
         }
         
-        init(frontNode:GZFlingNode){
+        convenience init(frontNode:GZFlingNode){
+            
+            self.init()
             
             var copy = frontNode.copy() as GZFlingNode
             
             self.push(node: frontNode)
             
-            PrivateQueueInstance.size = 1
+            self.privateQueueInstance.size = 1
         }
         
 //        func pop() -> GZFlingNode? {
@@ -96,64 +103,93 @@ class GZFlingNode:NSObject,NSCopying {
             
             var copy = node.copy() as GZFlingNode
             
-            if let frontNode = PrivateQueueInstance.frontNode {
+            if let frontNode = self.privateQueueInstance.frontNode {
                 copy.privateInstance.nextNode = frontNode
-                PrivateQueueInstance.rearNode!.privateInstance.nextNode = copy
-                PrivateQueueInstance.rearNode = copy
+                self.privateQueueInstance.rearNode!.privateInstance.nextNode = copy
+                self.privateQueueInstance.rearNode = copy
                 
             }else{
                 copy.privateInstance.nextNode = copy
-                PrivateQueueInstance.frontNode = copy
-                PrivateQueueInstance.rearNode = copy
-                PrivateQueueInstance.currentNode = copy
+                self.privateQueueInstance.frontNode = copy
+                self.privateQueueInstance.rearNode = copy
+                self.privateQueueInstance.currentNode = copy
             }
             
-            PrivateQueueInstance.size++
+            self.privateQueueInstance.size++
             
         }
         
         func next() -> GZFlingNode {
             
             var nextNode:GZFlingNode = (self.currentNode?.nextNode)!
-            PrivateQueueInstance.currentNode = nextNode
+            self.privateQueueInstance.currentNode = nextNode
             
-            PrivateQueueInstance.rearNode = self.rearNode?.nextNode
-            PrivateQueueInstance.frontNode = self.frontNode?.nextNode
+            self.privateQueueInstance.rearNode = self.rearNode?.nextNode
+            self.privateQueueInstance.frontNode = self.frontNode?.nextNode
             
             return nextNode
         }
         
-        var description:String{
-            get{
-                var rearNode = self.rearNode
-                var printNode = self.frontNode
+        func enumerateObjectsUsingBlock(block:(node:GZFlingNode, idx:Int, isEnded:UnsafeMutablePointer<Bool>)->Void){
+            
+            var isEndedPtr = UnsafeMutablePointer<Bool>()
+            isEndedPtr.memory = false
+            
+            var rearNode = self.rearNode
+            var node = self.frontNode
+            var idx = 0
+            
+            do{
                 
-                var descriptionString = ""
+                block(node: node, idx: idx++, isEnded: isEndedPtr)
                 
-                do{
-                    
-                    descriptionString += "\(printNode)->"
-                    
-                    printNode = (printNode?.nextNode)!
-                    
-                }while printNode != self.frontNode
+                node = node.nextNode
                 
-                return descriptionString
-            }
+            }while node != self.frontNode
+            
         }
+        
+        func reset(){
+            if self.size == 0 {
+                return
+            }
+            self.rearNode.privateInstance.nextNode = nil
+            
+            var node = self.frontNode
+            
+            self.privateQueueInstance.frontNode = nil
+            self.privateQueueInstance.rearNode = nil
+            self.privateQueueInstance.currentNode = nil
+            self.privateQueueInstance.size = 0
+            
+            while node != nil {
+                
+                node.carryingView.removeFromSuperview()
+                node = node.nextNode
+                
+            }
+
+        }
+        
         
         func printLinkedList(){
             println(self)
+            
+            var a = NSArray()
         }
         
-        // MARK: PrivateQueueInstance
+        // MARK: - PrivateQueueInstance
         
         private struct PrivateQueueInstance {
-            static var frontNode : GZFlingNode?
-            static var rearNode : GZFlingNode?
-            static var currentNode : GZFlingNode?
+            var frontNode : GZFlingNode?
+            var rearNode : GZFlingNode?
+            var currentNode : GZFlingNode?
             
-            static var size:Int = 0
+            var size:Int = 0
+            
+            init(){
+                
+            }
             
         }
         
@@ -178,7 +214,7 @@ class GZFlingNode:NSObject,NSCopying {
     }
     
     
-    private let privateInstance:PrivateInstance
+    private var privateInstance:PrivateInstance
     
     init(carryingView:GZFlingCarryingView) {
         self.privateInstance = PrivateInstance(carryingView: carryingView)
@@ -198,9 +234,35 @@ class GZFlingNode:NSObject,NSCopying {
             self.carryingView = carryingView
         }
         
+        deinit{
+            
+            println("Node is deinit")
+
+        }
+        
     }
     
     
+}
+
+
+extension GZFlingNodesQueue : Printable {
+    var description:String{
+        get{
+            var rearNode = self.rearNode
+            var printNode = self.frontNode
+            
+            var descriptionString = ""
+            
+            self.enumerateObjectsUsingBlock { (node, idx, isEnded) -> Void in
+                descriptionString += "\(printNode)->"
+            }
+            
+            
+            return descriptionString
+        }
+    }
+
 }
 
 func += (nodeList:GZFlingNodesQueue, node:GZFlingNode){

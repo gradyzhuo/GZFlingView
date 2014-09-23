@@ -11,6 +11,7 @@ import UIKit
 public typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
 public typealias GZFlingViewAnimationType = GZFlingView.AnimationType
 
+
 public extension GZFlingView {
     
     public enum SwipingDirection:Int{
@@ -56,6 +57,8 @@ public extension GZFlingView {
         
         static var radomClosewise:CGFloat = -1
         
+        static var lastTranslation:CGPoint = CGPointZero
+        
         var choosingClosure:(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void{
             get{
                 switch self {
@@ -65,7 +68,7 @@ public extension GZFlingView {
                     
                     return {(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void in
                         
-                        carryingView.center = beginLocation.pointByOffsetting(translation.x, dy: translation.y)
+                        carryingView.layer.position = beginLocation.pointByOffsetting(translation.x, dy: translation.y)
                         carryingView.transform = CGAffineTransformMakeRotation(GZFlingViewAnimationType.radomClosewise*fabs(translation.x)/100*0.1)
                         
                     }
@@ -80,7 +83,7 @@ public extension GZFlingView {
                     return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in return }
                 case .Tinder:
                     return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
-                        carryingView.center = beginLocation
+                        carryingView.layer.position = beginLocation
                         carryingView.transform = CGAffineTransformIdentity
                     }
                 }
@@ -95,9 +98,9 @@ public extension GZFlingView {
                     return { (carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint)->Void in return }
                 case .Tinder:
                     
-                    return {(carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection,translation:CGPoint)->Void in
+                    return {(carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint)->Void in
                         
-                        carryingView.center.offset(translation.x, dy: translation.y)
+                        carryingView.layer.position.offset(translation.x*2, dy: translation.y*2)
                         carryingView.transform = CGAffineTransformMakeRotation(GZFlingViewAnimationType.radomClosewise * 0.25)
                         carryingView.alpha = 0
                         
@@ -106,6 +109,22 @@ public extension GZFlingView {
                 
             }
         }
+        
+        var completionHandler:(carryingView:GZFlingCarryingView, beginLocation:CGPoint) -> Void {
+            get{
+                switch self {
+                case .None:
+                    return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in return }
+                case .Tinder:
+                    return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
+                        carryingView.layer.position = beginLocation
+                        carryingView.transform = CGAffineTransformIdentity
+                    }
+                }
+            }
+        }
+        
+        
         
         static func getNewRandomClosewise() -> CGFloat{
             var random = arc4random()%10

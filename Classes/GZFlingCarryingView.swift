@@ -8,73 +8,67 @@
 
 import UIKit
 
-public typealias GZFlingCarryingView = GZFlingView.CarryingView
-
-public extension GZFlingView {
+public class GZFlingCarryingView: UIView {
     
-    public class CarryingView: UIView {
-        
-        public var flingIndex:Int = 0
-        
-        public var customView:UIView = UIView() {
-            willSet{
-                
-                if (newValue != customView) {
-                    customView.removeFromSuperview()
-                }
-                
-            }
+    public var flingIndex:Int = 0
+    
+    @IBOutlet public var customView:UIView! = UIView(){
+        willSet{
             
-            didSet{
-                
-                if oldValue != customView  {
-                    self.addSubview(customView)
-                }
+            if (newValue != customView) {
+                self.customView!.removeFromSuperview()
             }
             
         }
         
-        
-        public init(customView:UIView!) {
-            super.init()
+        didSet{
             
-            self.customView = customView
-            self.addSubview(customView)
-            
+            if oldValue != customView  {
+                self.addSubview(customView!)
+            }
         }
-        
-        public override init(frame: CGRect) {
-            super.init(frame: frame)
-            
-        }
-        
-        public required init(coder aDecoder: NSCoder) {
-            super.init()
-        }
-        
-        public override func layoutSubviews() {
-            super.layoutSubviews()
-            
-            //        println("layoutSubviews")
-            
-            self.customView.frame = self.bounds
-        }
-        
-        func relocation(#center:CGPoint!, prepareForShow showAgain:Bool){
-            
-            self.superview?.sendSubviewToBack(self)
-            
-            self.center = center
-            self.transform = CGAffineTransformIdentity
-            self.alpha = 1.0
-            
-            self.hidden = !showAgain
-            
-            
-        }
-        
         
     }
     
+    
+    public init(customView:UIView!) {
+        super.init()
+        
+        self.customView = customView
+        self.addSubview(customView)
+    }
+
+    
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    public required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    func reset(){
+        
+        self.superview?.sendSubviewToBack(self)
+        
+        if self.constraints().count > 0{
+            self.setNeedsLayout()
+        }else{
+            self.customView.frame = self.bounds
+        }
+        
+    }
+    
+    func prepareForShow(){
+        self.reset()
+        
+        self.alpha = 1.0
+        
+    }
+    
+    deinit{
+        println("GZFlingCarryingView is deinit")
+        
+    }
     
 }
