@@ -16,7 +16,7 @@ public class GZFlingView: UIView {
     */
     public  var topCarryingView : GZFlingCarryingView!{
         get{
-            return self.nodesQueue.currentNode!.carryingView
+            return self.nodesQueue.currentNode?.carryingView
         }
     }
     
@@ -25,7 +25,7 @@ public class GZFlingView: UIView {
     */
     public var nextCarryingView : GZFlingCarryingView!{
         get{
-            return self.nodesQueue.currentNode!.nextNode!.carryingView
+            return self.nodesQueue.currentNode?.nextNode?.carryingView
         }
     }
     
@@ -81,6 +81,8 @@ public class GZFlingView: UIView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         
+        PrivateInstance.beginLocation = self.bounds.center
+        
         if self.nodesQueue.size == 0 {
             
             self.reloadData()
@@ -102,10 +104,10 @@ public class GZFlingView: UIView {
         switch direction {
             
         case .Left:
-            translation = CGPoint(x: -100, y: 50)
+            translation = CGPoint(x: -100, y: 0)
             
         case .Right:
-            translation = CGPoint(x: 100, y: -50)
+            translation = CGPoint(x: 100, y: -0)
             
         case .Undefined:
             translation = CGPoint(x: 0, y: 0)
@@ -139,9 +141,14 @@ public class GZFlingView: UIView {
                 self.sendSubviewToBack(carryingView)
                 
                 carryingView.frame = self.bounds
+                carryingView.layer.position = PrivateInstance.beginLocation!
+                
                 carryingView.flingIndex = index
                 
-                self.askDelegateForNeedShow(self.delegate as GZFlingViewDelegate, forCarryingView: carryingView, atIndex: index)
+                carryingView.alpha = 0
+                
+                
+                self.askDatasourceForNeedShow(self.dataSource as GZFlingViewDatasource, forCarryingView: carryingView, atIndex: index)
                 
                 
                 self.nodesQueue += GZFlingNode(carryingView: carryingView)
@@ -152,6 +159,7 @@ public class GZFlingView: UIView {
             
         }
         
+        self.tellDelegateWillShow(carryingView: self.nodesQueue.frontNode.carryingView, atFlingIndex: 0)
         self.tellDelegateDidShow(carryingView: self.nodesQueue.frontNode.carryingView, atFlingIndex: 0)
         
     }
@@ -160,7 +168,6 @@ public class GZFlingView: UIView {
     
     func initialize(){
         self.prepareGestures()
-        PrivateInstance.beginLocation = self.bounds.center
     }
     
     
@@ -176,6 +183,7 @@ public class GZFlingView: UIView {
         var currentCarryingView = (self.nodesQueue.currentNode?.carryingView)!
         var nextCarryingView = self.nodesQueue.next().carryingView
         
+        self.tellDelegateWillShow(carryingView: currentCarryingView, atFlingIndex: nextCarryingView.flingIndex)
         
         UIView.animateWithDuration(0.2, delay: 0, options: UIViewAnimationOptions.LayoutSubviews | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.OverrideInheritedDuration , animations:{ [weak self] ()-> Void in
             
@@ -202,9 +210,13 @@ public class GZFlingView: UIView {
                     
                     weakSelf.swipingAnimationType.completionHandler(carryingView: currentCarryingView, beginLocation: PrivateInstance.beginLocation!)
                     
-                    weakSelf.askDelegateForNeedShow(delegate, forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
-                    PrivateInstance.counter++
                 }
+                
+                if let dataSource : GZFlingViewDatasource = weakSelf.dataSource as? GZFlingViewDatasource {
+                    weakSelf.askDatasourceForNeedShow(dataSource, forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
+                }
+                
+                PrivateInstance.counter++
                 
         }
 
@@ -368,25 +380,26 @@ extension GZFlingView {
         
     }
     
-    func askDelegateForNeedShow(delegate:GZFlingViewDelegate, forCarryingView carryView:GZFlingCarryingView, atIndex index:Int){
+    
+    
+    func askDatasourceForNeedShow(dataSource:GZFlingViewDatasource, forCarryingView carryView:GZFlingCarryingView, atIndex index:Int){
         
         var selectorForCheck = Selector("flingView:shouldNeedShowCarryingViewAtFlingIndex:")
         
-        if delegate.respondsToSelector(selectorForCheck) && delegate.flingView!(self, shouldNeedShowCarryingViewAtFlingIndex: index) {
+        if dataSource.respondsToSelector(selectorForCheck) && dataSource.flingView!(self, shouldNeedShowCarryingViewAtFlingIndex: index) {
             
             
             
             selectorForCheck = Selector("flingView:prepareCarryingView:atFlingIndex:")
             
-            if delegate.respondsToSelector(selectorForCheck) {
+            if dataSource.respondsToSelector(selectorForCheck) {
                 
                 carryView.flingIndex = index
                 
                 carryView.prepareForShow()
                 
-                self.tellDelegateWillShow(carryingView: carryView, atFlingIndex: index)
+                dataSource.flingView!(self, prepareCarryingView: carryView, atFlingIndex: index)
                 
-                delegate.flingView!(self, prepareCarryingView: carryView, atFlingIndex: index)
                 
             }
             
@@ -455,8 +468,6 @@ extension GZFlingView {
     optional func flingView(flingView:GZFlingView, willCancelChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     optional func flingView(flingView:GZFlingView, didCancelChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     
-    optional func flingView(flingView:GZFlingView, shouldNeedShowCarryingViewAtFlingIndex index:Int)->Bool
-    optional func flingView(flingView:GZFlingView, prepareCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     
     optional func flingView(flingView:GZFlingView, willShowCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     optional func flingView(flingView:GZFlingView, didShowCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
@@ -476,5 +487,8 @@ extension GZFlingView {
 @objc public protocol GZFlingViewDatasource : NSObjectProtocol{
     func numberOfCarryingViewsForReusingInFlingView(flingView:GZFlingView) -> Int
     func flingView(flingView:GZFlingView, carryingViewForReusingAtIndex reuseIndex:Int) -> GZFlingCarryingView
+    
+    optional func flingView(flingView:GZFlingView, shouldNeedShowCarryingViewAtFlingIndex index:Int)->Bool
+    optional func flingView(flingView:GZFlingView, prepareCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
 }
 

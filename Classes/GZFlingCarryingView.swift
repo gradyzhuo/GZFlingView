@@ -51,9 +51,7 @@ public class GZFlingCarryingView: UIView {
         
         self.superview?.sendSubviewToBack(self)
         
-        if self.constraints().count > 0{
-            self.setNeedsLayout()
-        }else{
+        if self.constraints().count <= 0{
             self.customView.frame = self.bounds
         }
         
