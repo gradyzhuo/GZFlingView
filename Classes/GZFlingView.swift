@@ -351,9 +351,6 @@ extension GZFlingView {
                 delegate.flingView!(self, willShowCarryingView: carryingView, atFlingIndex: index)
             }
             
-            
-            PrivateInstance.predictEndIndex = index
-            
         }
         
     }
@@ -400,6 +397,7 @@ extension GZFlingView {
                 
                 dataSource.flingView!(self, prepareCarryingView: carryView, atFlingIndex: index)
                 
+                PrivateInstance.predictEndIndex = index
                 
             }
             
