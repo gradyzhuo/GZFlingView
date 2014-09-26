@@ -65,7 +65,7 @@ public class GZFlingCarryingView: UIView {
     }
     
     deinit{
-        println("GZFlingCarryingView is deinit")
+//        println("GZFlingCarryingView is deinit")
         
     }
     

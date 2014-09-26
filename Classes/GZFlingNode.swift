@@ -236,7 +236,7 @@ class GZFlingNode : NSObject, NSCopying {
         
         deinit{
             
-            println("Node is deinit")
+//            println("Node is deinit")
 
         }
         

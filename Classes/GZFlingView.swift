@@ -38,6 +38,15 @@ public class GZFlingView: UIView {
         }
     }
     
+    public var carryingViews:[GZFlingCarryingView]{
+        get{
+            
+            
+            
+            return []
+        }
+    }
+    
     @IBOutlet public var dataSource: AnyObject?
     @IBOutlet public var delegate: AnyObject?
     
@@ -54,10 +63,14 @@ public class GZFlingView: UIView {
         }
     }
     
+    public var swipingAnimationType:GZFlingViewAnimationType = .Tinder{//給外面改動畫類型
+        didSet{
+            swipingAnimationType.animation.flingView = self
+        }
+    }
+
     
     private var nodesQueue = GZFlingNodesQueue()
-    private var swipingAnimationType:GZFlingViewAnimationType = .Tinder
-    
     
     
     //MARK: - Public Methods
@@ -91,6 +104,14 @@ public class GZFlingView: UIView {
         
     }
 
+    //FMIXME: when add subview and setting autolayout, it'll be crash on iOS7.
+    
+    override public func layoutSublayersOfLayer(layer: CALayer!) {
+        
+        self.layoutSubviews()
+        super.layoutSublayersOfLayer(layer)
+    }
+    
     
     public func choose(direction:GZFlingViewSwipingDirection){
         
@@ -168,6 +189,7 @@ public class GZFlingView: UIView {
     
     func initialize(){
         self.prepareGestures()
+        self.swipingAnimationType.animation.flingView = self
     }
     
     
@@ -185,11 +207,11 @@ public class GZFlingView: UIView {
         
         self.tellDelegateWillShow(carryingView: currentCarryingView, atFlingIndex: nextCarryingView.flingIndex)
         
-        UIView.animateWithDuration(0.2, delay: 0, options: UIViewAnimationOptions.LayoutSubviews | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.OverrideInheritedDuration , animations:{ [weak self] ()-> Void in
+        UIView.animateWithDuration(0.2, delay: 0, options: UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.OverrideInheritedDuration , animations:{ [weak self] ()-> Void in
             
             var weakSelf = self!
             
-            weakSelf.swipingAnimationType.completionAnimation(carryingView: currentCarryingView, direction:direction, translation: translation)
+            weakSelf.swipingAnimationType.animation.completionAnimation(flingView:self!, carryingView: currentCarryingView, direction:direction, translation: translation)
             
             }) {[weak self] (finished:Bool)->Void in
                 
@@ -208,7 +230,7 @@ public class GZFlingView: UIView {
                         delegate.flingView!(weakSelf, didChooseCarryingView: currentCarryingView, atFlingIndex: currentCarryingView.flingIndex)
                     }
                     
-                    weakSelf.swipingAnimationType.completionHandler(carryingView: currentCarryingView, beginLocation: PrivateInstance.beginLocation!)
+                    weakSelf.swipingAnimationType.animation.completionHandler(flingView:self!, carryingView: currentCarryingView, beginLocation: PrivateInstance.beginLocation!)
                     
                 }
                 
@@ -229,9 +251,9 @@ public class GZFlingView: UIView {
         var time = NSTimeInterval(0.4)
         var velocity = translation.velocityByTimeInterval(time)/15
         
-        UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.LayoutSubviews , animations: {[weak self] () -> Void in
+        UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
-            self!.swipingAnimationType.cancelAnimation(carryingView: self!.topCarryingView, beginLocation: beginLocation)
+            self!.swipingAnimationType.animation.cancelAnimation(flingView:self!, carryingView: self!.topCarryingView, beginLocation: beginLocation)
             
             }, completion: {[weak self] (finished:Bool)->Void in
 
@@ -275,7 +297,7 @@ extension GZFlingView : UIGestureRecognizerDelegate {
             
             if let beginLocation = PrivateInstance.beginLocation {
                 
-                self.swipingAnimationType.choosingClosure(carryingView: self.topCarryingView, beginLocation: PrivateInstance.beginLocation!, translation: translation)
+                self.swipingAnimationType.animation.choosingClosure(flingView:self, carryingView: self.topCarryingView, beginLocation: PrivateInstance.beginLocation!, translation: translation)
                 
                 self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
                 
@@ -343,6 +365,10 @@ extension GZFlingView {
     
     func tellDelegateWillShow(#carryingView:GZFlingCarryingView, atFlingIndex index:Int){
         
+        if self.isEnded {
+            return
+        }
+        
         if let delegateObject: AnyObject = self.delegate {
             
             var delegate = delegateObject as GZFlingViewDelegate
@@ -356,6 +382,7 @@ extension GZFlingView {
     }
     
     func tellDelegateDidShow(#carryingView:GZFlingCarryingView, atFlingIndex index:Int){
+        
         
         PrivateInstance.topIndex = index
         

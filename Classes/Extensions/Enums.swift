@@ -8,142 +8,83 @@
 
 import UIKit
 
-public typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
-public typealias GZFlingViewAnimationType = GZFlingView.AnimationType
+//public typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
+//public typealias GZFlingViewAnimationType = GZFlingView.AnimationType
 
-
-public extension GZFlingView {
+public enum GZFlingViewSwipingDirection:Int{
     
-    public enum SwipingDirection:Int{
+    case Left = 0
+    case Right = 1
+    case Undefined = 2
+    
+    init(rawValue:Int){
         
-        case Left = 0
-        case Right = 1
-        case Undefined = 2
-        
-        init(rawValue:Int){
+        switch rawValue {
             
-            switch rawValue {
-                
-            case 0 :
-                self = .Left
-            case 1 :
-                self = .Right
-            default:
-                self = .Undefined
-                
-            }
+        case 0 :
+            self = .Left
+        case 1 :
+            self = .Right
+        default:
+            self = .Undefined
             
-        }
-        
-        public var description:String{
-            get{
-                
-                switch self {
-                case .Left: return "Left"
-                case .Right: return "Right"
-                case .Undefined: return "Undefined"
-                }
-                
-            }
         }
         
     }
     
+    public var description:String{
+        get{
+            
+            switch self {
+            case .Left: return "Left"
+            case .Right: return "Right"
+            case .Undefined: return "Undefined"
+            }
+            
+        }
+    }
     
-    public enum AnimationType:Int {
-        case None
-        case Tinder
+}
+
+
+public enum GZFlingViewAnimationType:Int {
+    case None
+    case Default
+    case Tinder
+    
+    static var radomClosewise:CGFloat = -1
+    
+    static var lastTranslation:CGPoint = CGPointZero
+    
+    var animation:GZFlingViewAnimation {
         
-        
-        static var radomClosewise:CGFloat = -1
-        
-        static var lastTranslation:CGPoint = CGPointZero
-        
-        var choosingClosure:(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void{
-            get{
-                switch self {
-                case .None:
-                    return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void in return }
-                case .Tinder:
-                    
-                    return {(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void in
-                        
-                        carryingView.layer.position = beginLocation.pointByOffsetting(translation.x, dy: translation.y)
-                        carryingView.transform = CGAffineTransformMakeRotation(GZFlingViewAnimationType.radomClosewise*fabs(translation.x)/100*0.1)
-                        
-                    }
-                }
-            }
-        }
-        
-        var cancelAnimation:(carryingView:GZFlingCarryingView, beginLocation:CGPoint) -> Void {
-            get{
-                switch self {
-                case .None:
-                    return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in return }
-                case .Tinder:
-                    return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
-                        carryingView.layer.position = beginLocation
-                        carryingView.transform = CGAffineTransformIdentity
-                    }
-                }
-            }
-        }
-        
-        var completionAnimation:(carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint) -> Void {
-            get{
-                
-                switch self {
-                case .None:
-                    return { (carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint)->Void in return }
-                case .Tinder:
-                    
-                    return {(carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint)->Void in
-                        
-                        carryingView.layer.position.offset(translation.x*2, dy: translation.y*2)
-                        carryingView.transform = CGAffineTransformMakeRotation(GZFlingViewAnimationType.radomClosewise * 0.25)
-                        carryingView.alpha = 0
-                        
-                    }
-                }
-                
-            }
-        }
-        
-        var completionHandler:(carryingView:GZFlingCarryingView, beginLocation:CGPoint) -> Void {
-            get{
-                switch self {
-                case .None:
-                    return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in return }
-                case .Tinder:
-                    return { (carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
-                        carryingView.layer.position = beginLocation
-                        carryingView.transform = CGAffineTransformIdentity
-                    }
-                }
-            }
-        }
-        
-        
-        
-        static func getNewRandomClosewise() -> CGFloat{
-            var random = arc4random()%10
+        switch self {
             
-            switch random {
-                
-            case 0: fallthrough
-            case 1:
-                GZFlingViewAnimationType.radomClosewise = 1
-                
-            default:
-                GZFlingViewAnimationType.radomClosewise = -1
-                
-            }
-            
-            return GZFlingViewAnimationType.radomClosewise
+        case .Tinder, .Default :
+            return GZFlingViewAnimationTinder()
+        case .None :
+            return GZFlingViewAnimation()
             
         }
         
+        
+    }
+    
+    static func getNewRandomClosewise() -> CGFloat{
+        var random = arc4random()%10
+        
+        switch random {
+            
+        case 0: fallthrough
+        case 1:
+            GZFlingViewAnimationType.radomClosewise = 1
+            
+        default:
+            GZFlingViewAnimationType.radomClosewise = -1
+            
+        }
+        
+        return GZFlingViewAnimationType.radomClosewise
         
     }
     
