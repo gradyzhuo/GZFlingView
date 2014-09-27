@@ -8,12 +8,6 @@
 
 import Foundation
 
-typealias GZFlingViewAnimationChoosingAnimationHandler = (flingView:GZFlingView ,carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void
-
-typealias GZFlingViewAnimationCompletionHandler = (carryingView:GZFlingCarryingView, beginLocation:CGPoint) -> Void
-
-
-
 public class GZFlingViewAnimation {
     
     var flingView:GZFlingView!
@@ -27,9 +21,12 @@ public class GZFlingViewAnimation {
         self.reset()
     }
     
+    func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){}
+    
     func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    
     func showCancelAnimation(#direction:GZFlingViewSwipingDirection, beginLocation:CGPoint, translation:CGPoint,completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
-    func flingGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){}
+    
     
     func reset(){}
     func reset(currentCarryingView carryingView:GZFlingCarryingView, beginLocation:CGPoint){self.reset()}
@@ -41,7 +38,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     var radomClosewise:CGFloat = -1
     
-    override func flingGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){
+    override func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){
         carryingView.layer.position = beginLocation.pointByOffsetting(translation.x, dy: translation.y)
         carryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise*fabs(translation.x)/100*0.1)
     }

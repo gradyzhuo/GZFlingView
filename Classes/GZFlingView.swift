@@ -321,10 +321,7 @@ extension GZFlingView : UIGestureRecognizerDelegate {
         PrivateInstance.translation = translation
         
         
-        switch(gesture.state){
-
-        case .Ended:
-            
+        if gesture.state == .Ended {
             PrivateInstance.direction = GZFlingViewSwipingDirection(rawValue: Int(translation.x > 0))
             
             if fabs(translation.x) > self.frame.width/6*2   {
@@ -332,24 +329,16 @@ extension GZFlingView : UIGestureRecognizerDelegate {
             }else{
                 self.showCancelAnimation(self.direction, beginLocation: PrivateInstance.beginLocation!, translation: translation)
             }
-            
-        case .Changed:
-            
+        }else if gesture.state == .Changed {
             if let beginLocation = PrivateInstance.beginLocation {
                 
-                self.animation?.flingGestureFrameAnimation(self.topCarryingView, beginLocation: PrivateInstance.beginLocation!, translation: translation)
-
+                self.animation?.dragGestureFrameAnimation(self.topCarryingView, beginLocation: PrivateInstance.beginLocation!, translation: translation)
+                
                 self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
-                
-                
             }
-        case .Cancelled:
-            self.showCancelAnimation(self.direction, beginLocation: PrivateInstance.beginLocation!, translation: translation)
-            
-        default:
-            self.animation?.reset()
-            
+
         }
+        
     }
     
     
