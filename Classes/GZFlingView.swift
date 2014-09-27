@@ -63,12 +63,7 @@ public class GZFlingView: UIView {
         }
     }
     
-    public var swipingAnimationType:GZFlingViewAnimationType = .Tinder{//給外面改動畫類型
-        didSet{
-            swipingAnimationType.animation.flingView = self
-        }
-    }
-
+    public var animation:GZFlingViewAnimation?
     
     private var nodesQueue = GZFlingNodesQueue()
     
@@ -87,7 +82,6 @@ public class GZFlingView: UIView {
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        
         self.initialize()
     }
     
@@ -113,13 +107,16 @@ public class GZFlingView: UIView {
     }
     
     
+    public func nextCarryingView(fromCarryingView carryingView:GZFlingCarryingView) -> GZFlingCarryingView? {
+        var node = self.nodeByCarryingView(carryingView)
+        return node?.nextNode.carryingView
+    }
+    
     public func choose(direction:GZFlingViewSwipingDirection){
         
         if PrivateInstance.overEnd  {
             return
         }
-        
-        PrivateInstance.gestruBeginReset()
         
         var translation:CGPoint?
         switch direction {
@@ -137,7 +134,6 @@ public class GZFlingView: UIView {
         
         PrivateInstance.direction = direction
         self.showChoosenAnimation(direction, translation: translation!)
-        
         
         
     }
@@ -189,7 +185,7 @@ public class GZFlingView: UIView {
     
     func initialize(){
         self.prepareGestures()
-        self.swipingAnimationType.animation.flingView = self
+        self.animation = GZFlingViewAnimationTinder(flingView: self)
     }
     
     
@@ -199,48 +195,92 @@ public class GZFlingView: UIView {
         self.addGestureRecognizer(panGestureRecognizer)
     }
     
+    private func nodeByCarryingView(carryingView:GZFlingCarryingView) -> GZFlingNode?{
+        var resultNode:GZFlingNode? = nil
+        self.nodesQueue.enumerateObjectsUsingBlock { (node:GZFlingNode, idx, isEnded) -> Void in
+            if node.carryingView == carryingView {
+                resultNode = node
+            }
+        }
+        return resultNode
+    }
     
     func showChoosenAnimation(direction:GZFlingViewSwipingDirection, translation:CGPoint){
         
         var currentCarryingView = (self.nodesQueue.currentNode?.carryingView)!
-        var nextCarryingView = self.nodesQueue.next().carryingView
+        var nextCarryingView = self.nodesQueue.currentNode.nextNode.carryingView
         
         self.tellDelegateWillShow(carryingView: currentCarryingView, atFlingIndex: nextCarryingView.flingIndex)
         
-        UIView.animateWithDuration(0.2, delay: 0, options: UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.OverrideInheritedDuration , animations:{ [weak self] ()-> Void in
+        self.animation?.showChoosenAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
             var weakSelf = self!
             
-            weakSelf.swipingAnimationType.animation.completionAnimation(flingView:self!, carryingView: currentCarryingView, direction:direction, translation: translation)
+            var selectorForCheck:Selector!
             
-            }) {[weak self] (finished:Bool)->Void in
+            weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+            
+            if let delegate : GZFlingViewDelegate = weakSelf.delegate as? GZFlingViewDelegate {
                 
+                selectorForCheck = Selector("flingView:didChooseCarryingView:atFlingIndex:")
                 
-                var weakSelf = self!
-                
-                var selectorForCheck:Selector!
-                
-                weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
-                
-                if let delegate : GZFlingViewDelegate = weakSelf.delegate as? GZFlingViewDelegate {
-                    
-                    selectorForCheck = Selector("flingView:didChooseCarryingView:atFlingIndex:")
-                    
-                    if delegate.respondsToSelector(selectorForCheck) {
-                        delegate.flingView!(weakSelf, didChooseCarryingView: currentCarryingView, atFlingIndex: currentCarryingView.flingIndex)
-                    }
-                    
-                    weakSelf.swipingAnimationType.animation.completionHandler(flingView:self!, carryingView: currentCarryingView, beginLocation: PrivateInstance.beginLocation!)
-                    
+                if delegate.respondsToSelector(selectorForCheck) {
+                    delegate.flingView!(weakSelf, didChooseCarryingView: currentCarryingView, atFlingIndex: currentCarryingView.flingIndex)
                 }
                 
-                if let dataSource : GZFlingViewDatasource = weakSelf.dataSource as? GZFlingViewDatasource {
-                    weakSelf.askDatasourceForNeedShow(dataSource, forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
-                }
+                weakSelf.animation!.reset(currentCarryingView: currentCarryingView, beginLocation: PrivateInstance.beginLocation!)//completionHandler(carryingView: currentCarryingView, beginLocation: PrivateInstance.beginLocation!)
                 
-                PrivateInstance.counter++
-                
-        }
+            }
+            
+            if let dataSource : GZFlingViewDatasource = weakSelf.dataSource as? GZFlingViewDatasource {
+                weakSelf.askDatasourceForNeedShow(dataSource, forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
+            }
+            
+            PrivateInstance.counter++
+        })
+        
+        self.nodesQueue.next()
+        
+//
+//        self.tellDelegateWillShow(carryingView: currentCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+//        
+//        var time = NSTimeInterval(0.4)
+//        var velocity = translation.velocityByTimeInterval(time)/15
+//        
+//        UIView.animateWithDuration(time, delay: 0, options: UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.OverrideInheritedDuration , animations:{ [weak self] ()-> Void in
+//            
+//            var weakSelf = self!
+//            
+//            weakSelf.swipingAnimationType.animation.completionAnimation(flingView:self!, carryingView: currentCarryingView, direction:direction, translation: translation)
+//            
+//            }) {[weak self] (finished:Bool)->Void in
+//                
+//                
+//                var weakSelf = self!
+//                
+//                var selectorForCheck:Selector!
+//                
+//                weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+//                
+//                if let delegate : GZFlingViewDelegate = weakSelf.delegate as? GZFlingViewDelegate {
+//                    
+//                    selectorForCheck = Selector("flingView:didChooseCarryingView:atFlingIndex:")
+//                    
+//                    if delegate.respondsToSelector(selectorForCheck) {
+//                        delegate.flingView!(weakSelf, didChooseCarryingView: currentCarryingView, atFlingIndex: currentCarryingView.flingIndex)
+//                    }
+//                    
+//                    weakSelf.swipingAnimationType.animation.completionHandler(flingView:self!, carryingView: currentCarryingView, beginLocation: PrivateInstance.beginLocation!)
+//                    
+//                }
+//                
+//                if let dataSource : GZFlingViewDatasource = weakSelf.dataSource as? GZFlingViewDatasource {
+//                    weakSelf.askDatasourceForNeedShow(dataSource, forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
+//                }
+//                
+//                PrivateInstance.counter++
+//                
+//        }
 
     }
     
@@ -248,20 +288,24 @@ public class GZFlingView: UIView {
         
         self.tellDelegateWillCancelChoosingCarryingView(carryingView: self.topCarryingView)
         
-        var time = NSTimeInterval(0.4)
-        var velocity = translation.velocityByTimeInterval(time)/15
-        
-        UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
-            
-            self!.swipingAnimationType.animation.cancelAnimation(flingView:self!, carryingView: self!.topCarryingView, beginLocation: beginLocation)
-            
-            }, completion: {[weak self] (finished:Bool)->Void in
-
-                
-                self!.tellDelegateDidCancelChoosingCarryingView(carryingView: self!.topCarryingView)
-                
-                
+        self.animation?.showCancelAnimation(direction: direction, beginLocation: beginLocation, translation: translation, completionHandler: {[weak self] (finished) -> Void in
+            self!.tellDelegateDidCancelChoosingCarryingView(carryingView: self!.topCarryingView)
         })
+        
+//        var time = NSTimeInterval(0.4)
+//        var velocity = translation.velocityByTimeInterval(time)/15
+//        
+//        UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
+//            
+//            self!.swipingAnimationType.animation.cancelAnimation(flingView:self!, carryingView: self!.topCarryingView, beginLocation: beginLocation)
+//            
+//            }, completion: {[weak self] (finished:Bool)->Void in
+//
+//                
+//                self!.tellDelegateDidCancelChoosingCarryingView(carryingView: self!.topCarryingView)
+//                
+//                
+//        })
     }
     
     
@@ -278,11 +322,7 @@ extension GZFlingView : UIGestureRecognizerDelegate {
         
         
         switch(gesture.state){
-            
-        case .Began:
-            PrivateInstance.gestruBeginReset()
-            
-            
+
         case .Ended:
             
             PrivateInstance.direction = GZFlingViewSwipingDirection(rawValue: Int(translation.x > 0))
@@ -297,15 +337,18 @@ extension GZFlingView : UIGestureRecognizerDelegate {
             
             if let beginLocation = PrivateInstance.beginLocation {
                 
-                self.swipingAnimationType.animation.choosingClosure(flingView:self, carryingView: self.topCarryingView, beginLocation: PrivateInstance.beginLocation!, translation: translation)
-                
+                self.animation?.flingGestureFrameAnimation(self.topCarryingView, beginLocation: PrivateInstance.beginLocation!, translation: translation)
+
                 self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
                 
                 
             }
+        case .Cancelled:
+            self.showCancelAnimation(self.direction, beginLocation: PrivateInstance.beginLocation!, translation: translation)
             
         default:
-            self.showCancelAnimation(self.direction, beginLocation: PrivateInstance.beginLocation!, translation: translation)
+            self.animation?.reset()
+            
         }
     }
     
@@ -466,12 +509,6 @@ extension GZFlingView {
                 return PrivateInstance.predictEndIndex != -1 && PrivateInstance.topIndex == PrivateInstance.predictEndIndex
                 
             }
-        }
-        
-        
-        static func gestruBeginReset(){
-            GZFlingViewAnimationType.getNewRandomClosewise()
-            
         }
         
         static func reset(){

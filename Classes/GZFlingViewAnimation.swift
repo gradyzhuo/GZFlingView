@@ -10,130 +10,115 @@ import Foundation
 
 typealias GZFlingViewAnimationChoosingAnimationHandler = (flingView:GZFlingView ,carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void
 
-typealias GZFlingViewAnimationChoosedAnimationHandler = (flingView:GZFlingView, carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint) -> Void
-
-typealias GZFlingViewAnimationCompletionHandler = (flingView:GZFlingView, carryingView:GZFlingCarryingView, beginLocation:CGPoint) -> Void
+typealias GZFlingViewAnimationCompletionHandler = (carryingView:GZFlingCarryingView, beginLocation:CGPoint) -> Void
 
 
 
-
-
-class GZFlingViewAnimation {
+public class GZFlingViewAnimation {
     
     var flingView:GZFlingView!
     
     init(){
-        self.flingView = nil
+        self.reset()
     }
     
     init(flingView:GZFlingView){
         self.flingView = flingView
+        self.reset()
     }
     
-    var choosingClosure:GZFlingViewAnimationChoosingAnimationHandler {
-        
-        get{
-            return { (flingView:GZFlingView, carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void in
-                
-                //empty
-            }
-        }
-        
-    }
+    func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    func showCancelAnimation(#direction:GZFlingViewSwipingDirection, beginLocation:CGPoint, translation:CGPoint,completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    func flingGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){}
     
-    var cancelAnimation:GZFlingViewAnimationCompletionHandler {
-        get{
-            return { (flingView:GZFlingView, carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
-                
-                //empty
-
-            }
-        }
-    }
-    
-    var completionAnimation:GZFlingViewAnimationChoosedAnimationHandler {
-        get{
-            
-            return { (flingView:GZFlingView, carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint)->Void in
-                
-                //empty
-                
-            }
-            
-        }
-    }
-
-    
-    var completionHandler:GZFlingViewAnimationCompletionHandler {
-        
-        get{
-            return { (flingView:GZFlingView, carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
-                
-                //empty
-            
-            }
-            
-        }
-    }
-
-    
-    
-    
+    func reset(){}
+    func reset(currentCarryingView carryingView:GZFlingCarryingView, beginLocation:CGPoint){self.reset()}
 }
 
 
 
-class GZFlingViewAnimationTinder:GZFlingViewAnimation{
+public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
+    
+    var radomClosewise:CGFloat = -1
+    
+    override func flingGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){
+        carryingView.layer.position = beginLocation.pointByOffsetting(translation.x, dy: translation.y)
+        carryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise*fabs(translation.x)/100*0.1)
+    }
+    
+    
+    override func showCancelAnimation(#direction:GZFlingViewSwipingDirection, beginLocation:CGPoint, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
+        
+        var currentCarryingView = self.flingView.topCarryingView
+        
+        var time = NSTimeInterval(0.4)
+        var velocity = translation.velocityByTimeInterval(time)/15
+        
+        UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
+            
+            currentCarryingView.layer.position = beginLocation
+            currentCarryingView.transform = CGAffineTransformIdentity
+
+            
+            }, completion: {[weak self] (finished:Bool)->Void in
+                
+                completionHandler(finished: finished)
+        })
+    }
+    
+    override func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
+        
+        var currentCarryingView = self.flingView.topCarryingView
+        var nextCarryingView = self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
+        
+//        self.flingView.tellDelegateWillShow(carryingView: currentCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+        
+        var time = NSTimeInterval(0.4)
+        var velocity = translation.velocityByTimeInterval(time)/15
+        
+        UIView.animateWithDuration(time, delay: 0, options: UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.OverrideInheritedDuration , animations:{ ()-> Void in
+
+            currentCarryingView.layer.position.offset(translation.x*2, dy: translation.y*2)
+            currentCarryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise * 0.25)
+            currentCarryingView.alpha = 0
+            
+            }) {(finished:Bool)->Void in
+                
+                completionHandler(finished: finished)
+                
+        }
+        
+    }
 
     
-    override var choosingClosure:GZFlingViewAnimationChoosingAnimationHandler {
+    func getNewRandomClosewise() -> CGFloat{
+        var random = arc4random()%10
         
-        get{
-            return {(flingView:GZFlingView ,carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint)->Void in
-                
-                carryingView.layer.position = beginLocation.pointByOffsetting(translation.x, dy: translation.y)
-                carryingView.transform = CGAffineTransformMakeRotation(GZFlingViewAnimationType.radomClosewise*fabs(translation.x)/100*0.1)
-                
-            }
+        var radomClosewise = -1
+        
+        switch random {
+
+        case 0,1,3:
+            radomClosewise = 1
+            
+        default:
+            radomClosewise = -1
         }
+        
+        return CGFloat(radomClosewise)
         
     }
     
-    override var cancelAnimation:GZFlingViewAnimationCompletionHandler {
-        get{
-            return { (flingView:GZFlingView, carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
-                carryingView.layer.position = beginLocation
-                carryingView.transform = CGAffineTransformIdentity
-            }
-        }
+    override func reset(){
+        self.radomClosewise = self.getNewRandomClosewise()
     }
     
-    override var completionAnimation:GZFlingViewAnimationChoosedAnimationHandler {
-        get{
-            
-            return {(flingView:GZFlingView, carryingView:GZFlingCarryingView, direction:GZFlingViewSwipingDirection, translation:CGPoint)->Void in
-                
-                carryingView.layer.position.offset(translation.x*2, dy: translation.y*2)
-                carryingView.transform = CGAffineTransformMakeRotation(GZFlingViewAnimationType.radomClosewise * 0.25)
-                carryingView.alpha = 0
-                
-            }
-            
-        }
-    }
-    
-    
-    override var completionHandler:GZFlingViewAnimationCompletionHandler {
+    override func reset(currentCarryingView carryingView:GZFlingCarryingView, beginLocation:CGPoint){
+        self.reset()
         
-        get{
-            
-            return { (flingView:GZFlingView, carryingView:GZFlingCarryingView, beginLocation:CGPoint)->Void in
-                carryingView.layer.position = beginLocation
-                carryingView.transform = CGAffineTransformIdentity
-            }
-            
-        }
+        carryingView.layer.position = beginLocation
+        carryingView.transform = CGAffineTransformIdentity
+        
     }
-    
     
 }
