@@ -11,6 +11,7 @@ import Foundation
 public class GZFlingViewAnimation {
     
     var flingView:GZFlingView!
+    var beginLocation:CGPoint = CGPoint()
     
     init(){
         self.reset()
@@ -21,15 +22,17 @@ public class GZFlingViewAnimation {
         self.reset()
     }
     
-    func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){}
+    func shouldCancel(#direction:GZFlingViewSwipingDirection, translation:CGPoint)->Bool{return true}
+    
+    func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, translation:CGPoint){}
     
     func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
     
-    func showCancelAnimation(#direction:GZFlingViewSwipingDirection, beginLocation:CGPoint, translation:CGPoint,completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    func showCancelAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint,completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
     
     
     func reset(){}
-    func reset(currentCarryingView carryingView:GZFlingCarryingView, beginLocation:CGPoint){self.reset()}
+    func reset(currentCarryingView carryingView:GZFlingCarryingView){self.reset()}
 }
 
 
@@ -38,13 +41,13 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     var radomClosewise:CGFloat = -1
     
-    override func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, beginLocation:CGPoint, translation:CGPoint){
-        carryingView.layer.position = beginLocation.pointByOffsetting(translation.x, dy: translation.y)
+    override func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, translation:CGPoint){
+        carryingView.layer.position = self.beginLocation.pointByOffsetting(translation.x, dy: translation.y)
         carryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise*fabs(translation.x)/100*0.1)
     }
     
     
-    override func showCancelAnimation(#direction:GZFlingViewSwipingDirection, beginLocation:CGPoint, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
+    override func showCancelAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
         
         var currentCarryingView = self.flingView.topCarryingView
         
@@ -53,7 +56,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
-            currentCarryingView.layer.position = beginLocation
+            currentCarryingView.layer.position = self!.beginLocation
             currentCarryingView.transform = CGAffineTransformIdentity
 
             
@@ -64,6 +67,8 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     }
     
     override func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
+        
+        println("translation:\(translation)")
         
         var currentCarryingView = self.flingView.topCarryingView
         var nextCarryingView = self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
@@ -110,12 +115,17 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         self.radomClosewise = self.getNewRandomClosewise()
     }
     
-    override func reset(currentCarryingView carryingView:GZFlingCarryingView, beginLocation:CGPoint){
+    override func reset(currentCarryingView carryingView:GZFlingCarryingView){
         self.reset()
         
-        carryingView.layer.position = beginLocation
+        carryingView.layer.position = self.beginLocation
         carryingView.transform = CGAffineTransformIdentity
         
+    }
+    
+    override func shouldCancel(#direction: GZFlingViewSwipingDirection, translation: CGPoint) -> Bool {
+        
+        return !(fabs(translation.x) > self.flingView.frame.width/6*2)
     }
     
 }
