@@ -24,9 +24,11 @@ public class GZFlingViewAnimation {
         self.reset()
     }
     
+    func prepare(#carryingView:GZFlingCarryingView, reuseIndex:Int){}
+    
     func shouldCancel(#direction:GZFlingViewSwipingDirection, translation:CGPoint)->Bool{return true}
     
-    func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, translation:CGPoint){}
+    func gesturePanning(#carryingView:GZFlingCarryingView, translation:CGPoint){}
     
     func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
     
@@ -43,7 +45,12 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     var radomClosewise:CGFloat = -1
     
-    override func dragGestureFrameAnimation(carryingView:GZFlingCarryingView, translation:CGPoint){
+    override func prepare(#carryingView: GZFlingCarryingView, reuseIndex: Int) {
+        carryingView.layer.position = self.beginLocation
+        carryingView.alpha = 0
+    }
+    
+    override func gesturePanning(#carryingView:GZFlingCarryingView, translation:CGPoint){
         carryingView.layer.position = self.beginLocation.pointByOffsetting(translation.x, dy: translation.y)
         carryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise*fabs(translation.x)/100*0.1)
     }
@@ -56,7 +63,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         var time = kGZFlingViewAnimationDuration
         var velocity = translation.velocityByTimeInterval(kGZFlingViewAnimationDuration)/15
         
-        UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
+        UIView.animateWithDuration(time, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 15, options: UIViewAnimationOptions.AllowAnimatedContent | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState | UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
             currentCarryingView.layer.position = self!.beginLocation
             currentCarryingView.transform = CGAffineTransformIdentity

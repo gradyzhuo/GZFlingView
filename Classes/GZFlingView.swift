@@ -165,13 +165,9 @@ public class GZFlingView: UIView {
                 self.sendSubviewToBack(carryingView)
                 
                 carryingView.frame = self.bounds
-                carryingView.layer.position = self.animation!.beginLocation
-                
                 carryingView.flingIndex = index
                 
-                carryingView.alpha = 0
-                
-                
+                self.animation!.prepare(carryingView: carryingView, reuseIndex: index)
                 self.askDatasourceForNeedShow(forCarryingView: carryingView, atIndex: index)
                 
                 
@@ -305,8 +301,7 @@ extension GZFlingView : UIGestureRecognizerDelegate {
         }else if gesture.state == .Changed {
             if let beginLocation = self.animation?.beginLocation {
                 
-                self.animation?.dragGestureFrameAnimation(self.topCarryingView, translation: translation)
-                
+                self.animation?.gesturePanning(carryingView: self.topCarryingView, translation: translation)                
                 self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
             }
 
