@@ -63,8 +63,7 @@ public class GZFlingView: UIView {
         }
     }
     
-    public var animation:GZFlingViewAnimation?
-    
+    public var animation:GZFlingViewAnimation = GZFlingViewAnimationTinder()
     private var nodesQueue = GZFlingNodesQueue()
     
     
@@ -72,16 +71,20 @@ public class GZFlingView: UIView {
     
     public override init() {
         super.init()
+        
         self.initialize()
+        
     }
     
     public required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        
         self.initialize()
     }
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
+        
         self.initialize()
     }
     
@@ -89,7 +92,7 @@ public class GZFlingView: UIView {
         super.layoutSubviews()
         
 //        PrivateInstance.beginLocation = self.bounds.center
-        self.animation?.beginLocation = self.bounds.center
+        self.animation.beginLocation = self.bounds.center
         
         if self.nodesQueue.size == 0 {
             
@@ -167,7 +170,7 @@ public class GZFlingView: UIView {
                 carryingView.frame = self.bounds
                 carryingView.flingIndex = index
                 
-                self.animation!.prepare(carryingView: carryingView, reuseIndex: index)
+                self.animation.prepare(carryingView: carryingView, reuseIndex: index)
                 self.askDatasourceForNeedShow(forCarryingView: carryingView, atIndex: index)
                 
                 
@@ -192,7 +195,7 @@ public class GZFlingView: UIView {
     
     func initialize(){
         self.prepareGestures()
-        self.animation = GZFlingViewAnimationTinder(flingView: self)
+        self.animation.flingView = self
     }
     
     
@@ -220,14 +223,14 @@ public class GZFlingView: UIView {
         
         self.tellDelegateWillShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
 
-        self.animation?.showChoosenAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
+        self.animation.showChoosenAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
             var weakSelf = self!
             
             weakSelf.tellDelegateDidChooseCarryingView(carryingView: currentCarryingView)
             
             weakSelf.askDatasourceForNeedShow(forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
-            weakSelf.animation!.reset(currentCarryingView: currentCarryingView)
+            weakSelf.animation.reset(currentCarryingView: currentCarryingView)
             
             weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
             
@@ -252,9 +255,9 @@ public class GZFlingView: UIView {
         
         self.tellDelegateWillCancelChoosingCarryingView(carryingView: self.topCarryingView)
         
-        self.animation?.showCancelAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
+        self.animation.showCancelAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
-            self!.animation?.reset()
+            self!.animation.reset()
             
             self!.tellDelegateDidCancelChoosingCarryingView(carryingView: self!.topCarryingView)
         })
@@ -285,25 +288,21 @@ extension GZFlingView : UIGestureRecognizerDelegate {
         
         var translation = gesture.translationInView(self)
         PrivateInstance.translation = translation
-        
-//        println("gesture:\(gesture)")
-        
+
         if gesture.state == .Ended {
             
             PrivateInstance.direction = GZFlingViewSwipingDirection(rawValue: Int(translation.x > 0))
             
-            if self.animation!.shouldCancel(direction: PrivateInstance.direction, translation: translation){
+            if self.animation.shouldCancel(direction: PrivateInstance.direction, translation: translation){
                 self.showCancelAnimation(self.direction, translation: translation)
             }else{
                 self.showChoosenAnimation(self.direction, translation: translation)
             }
             
         }else if gesture.state == .Changed {
-            if let beginLocation = self.animation?.beginLocation {
-                
-                self.animation?.gesturePanning(carryingView: self.topCarryingView, translation: translation)                
-                self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
-            }
+            
+            self.animation.gesturePanning(carryingView: self.topCarryingView, translation: translation)
+            self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
 
         }
         
