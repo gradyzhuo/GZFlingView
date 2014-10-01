@@ -17,7 +17,7 @@ public enum GZFlingViewSwipingDirection:Int{
     case Right = 1
     case Undefined = 2
     
-    init(rawValue:Int){
+    public init(rawValue:Int){
         
         switch rawValue {
             

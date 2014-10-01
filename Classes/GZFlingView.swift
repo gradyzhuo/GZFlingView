@@ -320,16 +320,15 @@ extension GZFlingView : UIGestureRecognizerDelegate {
 extension GZFlingView {
     
     func tellDelegateDidEndDragging(#carryingView:GZFlingCarryingView){
-        if let delegate:GZFlingViewDelegate = self.delegate as? GZFlingViewDelegate {
-            
-            if delegate.respondsToSelector("flingViewDidEndDragging:withDraggingCarryingView:") {
-                delegate.flingViewDidEndDragging!(self, withDraggingCarryingView: carryingView)
-            }
-            
+        
+        if let delegateMethod = self.delegate?.flingViewDidEndDragging {
+            delegateMethod(self, withDraggingCarryingView: carryingView)
         }
+        
     }
     
     func tellDelegateWillCancelChoosingCarryingView(#carryingView:GZFlingCarryingView){
+        
         if let delegate : GZFlingViewDelegate = self.delegate as? GZFlingViewDelegate {
             
             if delegate.respondsToSelector("flingView:willCancelChooseCarryingView:atFlingIndex:") {
