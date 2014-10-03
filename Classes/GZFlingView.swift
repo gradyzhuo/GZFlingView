@@ -411,16 +411,17 @@ extension GZFlingView {
         if let shouldNeedShowMethod = self.dataSource?.flingViewShouldNeedShowCarryingView {
             if shouldNeedShowMethod(self, atFlingIndex: index) {
                 
+                PrivateInstance.predictEndIndex = index
+                
+                carryingView.flingIndex = index
+                carryingView.alpha = 1.0
+                carryingView.prepareToShow()
+                
                 if let prepareMethod = self.dataSource?.flingViewPrepareCarryingView {
-                    carryingView.flingIndex = index
-                    
-                    carryingView.alpha = 1.0
-                    carryingView.prepareForShow()
-                    
                     prepareMethod(self, preparingCarryingView: carryingView, atFlingIndex: index)
-                    
-                    PrivateInstance.predictEndIndex = index
                 }
+                
+                
                 
             }
         }
