@@ -51,9 +51,9 @@ public class GZFlingCarryingView: UIView {
         
         self.superview?.sendSubviewToBack(self)
         
-        if self.constraints().count <= 0{
-            self.customView.frame = self.bounds
-        }
+//        if self.constraints().count <= 0{
+//            self.customView.frame = self.bounds
+//        }
         
     }
     
@@ -65,7 +65,7 @@ public class GZFlingCarryingView: UIView {
     }
     
     deinit{
-//        println("GZFlingCarryingView is deinit")
+//        GZDebugLog("GZFlingCarryingView is deinit")
         
     }
     

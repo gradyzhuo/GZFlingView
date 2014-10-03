@@ -169,7 +169,7 @@ class GZFlingNodesQueue{
     
     
     func printLinkedList(){
-        println(self)
+        GZDebugLog(self)
         
         var a = NSArray()
     }
@@ -238,7 +238,7 @@ class GZFlingNode : NSObject, NSCopying {
         
         deinit{
             
-//            println("Node is deinit")
+//            GZDebugLog("Node is deinit")
 
         }
         
