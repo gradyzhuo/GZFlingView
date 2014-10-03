@@ -126,10 +126,10 @@ public class GZFlingView: UIView {
         switch direction {
             
         case .Left:
-            translation = CGPoint(x: -100, y: 0)
+            translation = CGPoint(x: -200, y: 0)
             
         case .Right:
-            translation = CGPoint(x: 100, y: -0)
+            translation = CGPoint(x: 200, y: -0)
         
 //        case .Top:
 //            translation = CGPoint(x: 0, y: -100)

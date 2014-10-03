@@ -8,7 +8,7 @@
 
 import Foundation
 
-let kGZFlingViewAnimationDuration:NSTimeInterval = 0.2
+let kGZFlingViewAnimationDuration:NSTimeInterval = 0.3
 
 public class GZFlingViewAnimation {
     
@@ -80,7 +80,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
 
 //        var velocity = translation.velocityByTimeInterval(kGZFlingViewAnimationDuration)/15
         
-        UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{ ()-> Void in
+        UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{ ()-> Void in
 
             currentCarryingView.layer.position.offset(translation.x*2, dy: translation.y*2)
             currentCarryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise * 0.25)
