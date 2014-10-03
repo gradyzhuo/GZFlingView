@@ -11,6 +11,7 @@ import UIKit
 public class GZFlingCarryingView: UIView {
     
     public var flingIndex:Int = 0
+    public var flingView:GZFlingView!
     
     @IBOutlet public var customView:UIView! = UIView(){
         willSet{
@@ -47,20 +48,7 @@ public class GZFlingCarryingView: UIView {
         super.init(coder: aDecoder)
     }
     
-    func reset(){
-        
-        self.superview?.sendSubviewToBack(self)
-        
-//        if self.constraints().count <= 0{
-//            self.customView.frame = self.bounds
-//        }
-        
-    }
-    
-    func prepareForShow(){
-        self.reset()
-        
-        self.alpha = 1.0
+    public func prepareForShow(){
         
     }
     
