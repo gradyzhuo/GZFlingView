@@ -48,7 +48,7 @@ public class GZFlingCarryingView: UIView {
         super.init(coder: aDecoder)
     }
     
-    public func prepareToShow(){
+    public func prepareForReuse(){
         
     }
     

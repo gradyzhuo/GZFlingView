@@ -16,7 +16,7 @@ public class GZFlingView: UIView {
     */
     public  var topCarryingView : GZFlingCarryingView!{
         get{
-            return self.nodesQueue.currentNode?.carryingView
+            return self.nodesQueue.frontNode.carryingView //self.nodesQueue.currentNode?.carryingView
         }
     }
     
@@ -38,13 +38,14 @@ public class GZFlingView: UIView {
         }
     }
     
-    public var carryingViews:[GZFlingCarryingView]{
-        get{
-            
-            
-            
-            return []
-        }
+//    public var carryingViews:[GZFlingCarryingView]{
+//        get{
+//            return []
+//        }
+//    }
+    
+    public var panGestureRecognizer:UIPanGestureRecognizer{
+        return PrivateInstance.panGestureRecognizer
     }
     
     @IBOutlet public var dataSource: AnyObject?
@@ -170,7 +171,6 @@ public class GZFlingView: UIView {
                 carryingView.flingIndex = index
                 carryingView.flingView = self
                 
-                self.animation.prepare(carryingView: carryingView, reuseIndex: index)
                 self.askDatasourceForNeedShow(forCarryingView: carryingView, atIndex: index)
                 
                 self.nodesQueue += GZFlingNode(carryingView: carryingView)
@@ -182,8 +182,12 @@ public class GZFlingView: UIView {
         }
         
         if numberOfCarryingViews > 0 {
-            self.tellDelegateWillShow(carryingView: self.nodesQueue.frontNode.carryingView, atFlingIndex: 0)
-            self.tellDelegateDidShow(carryingView: self.nodesQueue.frontNode.carryingView, atFlingIndex: 0)
+            self.animation.willAppear(carryingView: self.topCarryingView)
+            self.animation.didAppear(carryingView: self.topCarryingView)
+            
+            self.tellDelegateWillShow(carryingView: self.topCarryingView, atFlingIndex: 0)
+            self.tellDelegateDidShow(carryingView: self.topCarryingView, atFlingIndex: 0)
+            
         }
         
         
@@ -199,8 +203,8 @@ public class GZFlingView: UIView {
     
     
     func prepareGestures(){
-        var panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "viewDidPan:")
-        panGestureRecognizer.delegate = self
+        self.panGestureRecognizer.addTarget(self, action: "viewDidPan:")
+        self.panGestureRecognizer.delegate = self
         self.addGestureRecognizer(panGestureRecognizer)
     }
     
@@ -221,6 +225,7 @@ public class GZFlingView: UIView {
         
         
         self.tellDelegateWillShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+        self.animation.willAppear(carryingView: nextCarryingView)
         
         self.animation.showChoosenAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
@@ -229,10 +234,10 @@ public class GZFlingView: UIView {
             weakSelf.tellDelegateDidChooseCarryingView(carryingView: currentCarryingView)
             
             weakSelf.askDatasourceForNeedShow(forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
-            weakSelf.animation.reset(currentCarryingView: currentCarryingView)
-            
+
             weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
             
+            weakSelf.animation.didAppear(carryingView: nextCarryingView)
             
             PrivateInstance.counter++
         })
@@ -240,8 +245,7 @@ public class GZFlingView: UIView {
         PrivateInstance.topIndex = nextCarryingView.flingIndex
         
         self.nodesQueue.next()
-        
-//        PrivateInstance.topIndex = 
+
         
         
 
@@ -252,8 +256,6 @@ public class GZFlingView: UIView {
         self.tellDelegateWillCancelChoosingCarryingView(carryingView: self.topCarryingView)
         
         self.animation.showCancelAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
-            
-            self!.animation.reset()
             
             self!.tellDelegateDidCancelChoosingCarryingView(carryingView: self!.topCarryingView)
         })
@@ -270,12 +272,15 @@ extension GZFlingView : UIGestureRecognizerDelegate {
         
         var translation = gesture.translationInView(self)
         PrivateInstance.translation = translation
-            
-        self.animation.gesturePanning(carryingView: self.topCarryingView, translation: translation)
+        
+        
+        self.animation.gesturePanning(gesture: gesture, translation: translation)
+        
         self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
         
-        
         if gesture.state == .Ended && !PrivateInstance.overEnd {
+            
+            self.tellDelegateDidEndDragging(carryingView: self.topCarryingView)
             
             PrivateInstance.direction = GZFlingViewSwipingDirection(rawValue: Int(translation.x > 0))
             
@@ -296,6 +301,7 @@ extension GZFlingView : UIGestureRecognizerDelegate {
         var should = self.nodesQueue.size != 0 && !PrivateInstance.overEnd  && self.dataSource != nil
         
         if should {
+            self.animation.willBeginGesture(gesture: gestureRecognizer as UIPanGestureRecognizer)
             self.tellDelegateWillBeginDragging(carryingView: self.topCarryingView)
         }
         
@@ -309,10 +315,12 @@ extension GZFlingView : UIGestureRecognizerDelegate {
 extension GZFlingView {
     
     func tellDelegateDidEndDragging(#carryingView:GZFlingCarryingView){
+    
+        self.animation.didEndGesture(gesture: self.panGestureRecognizer)
         
-//        if let delegateMethod = self.delegate?.flingViewDidEndDragging {
-//            delegateMethod(self, withDraggingCarryingView: carryingView)
-//        }
+        if let delegateMethod = self.delegate?.flingViewDidEndDragging {
+            delegateMethod(self, withDraggingCarryingView: carryingView)
+        }
         
     }
     
@@ -408,21 +416,22 @@ extension GZFlingView {
         
         self.sendSubviewToBack(carryingView)
         
-        if let shouldNeedShowMethod = self.dataSource?.flingViewShouldNeedShowCarryingView {
+        carryingView.flingIndex = index
+        
+        if let shouldNeedShowMethod = self.dataSource?.flingViewShouldEnd {
             if shouldNeedShowMethod(self, atFlingIndex: index) {
                 
                 PrivateInstance.predictEndIndex = index
                 
-                carryingView.flingIndex = index
+                self.animation.prepare(carryingView: carryingView, reuseIndex: index)
+                
                 carryingView.alpha = 1.0
-                carryingView.prepareToShow()
+                carryingView.prepareForReuse()
                 
                 if let prepareMethod = self.dataSource?.flingViewPrepareCarryingView {
                     prepareMethod(self, preparingCarryingView: carryingView, atFlingIndex: index)
                 }
-                
-                
-                
+
             }
         }
         
@@ -446,6 +455,8 @@ extension GZFlingView {
         
         static var translation:CGPoint = CGPointZero
         
+        static var panGestureRecognizer = UIPanGestureRecognizer()
+        
         static var overEnd:Bool {
             get{
                 return PrivateInstance.predictEndIndex != -1 && PrivateInstance.topIndex > PrivateInstance.predictEndIndex
@@ -458,8 +469,7 @@ extension GZFlingView {
                 
             }
         }
-        
-//        static var backupConstraitOfCarryingView:[AnyObject]?
+
         
         static func reset(){
             PrivateInstance.topIndex = -1
@@ -501,7 +511,7 @@ extension GZFlingView {
     func numberOfCarryingViewsForReusingInFlingView(flingView:GZFlingView) -> Int
     func carryingViewForReusingAtIndexInFlingView(flingView:GZFlingView, carryingViewForReusingAtIndex reuseIndex:Int) -> GZFlingCarryingView
     
-    optional func flingViewShouldNeedShowCarryingView(flingView:GZFlingView, atFlingIndex index:Int)->Bool
+    optional func flingViewShouldEnd(flingView:GZFlingView, atFlingIndex index:Int)->Bool
     optional func flingViewPrepareCarryingView(flingView:GZFlingView, preparingCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
 }
 
