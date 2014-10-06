@@ -14,7 +14,7 @@ enum GZFlingViewAnimationState:Int{
 }
 
 
-let kGZFlingViewAnimationDuration:NSTimeInterval = 0.3
+let kGZFlingViewAnimationDuration:NSTimeInterval = 0.2
 
 public class GZFlingViewAnimation {
     
@@ -88,21 +88,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     override func willAppear(#carryingView:GZFlingCarryingView){
         
-        
-
-    }
-    
-    
-    override func didAppear(#carryingView:GZFlingCarryingView){
-        
-        if !CGAffineTransformEqualToTransform(carryingView.transform, self.initialTransforms){
-            
-            carryingView.transform = CGAffineTransformIdentity
-            
-            return
-        }
-        
-        UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
+        UIView.animateWithDuration(0.2, delay: 0.06, usingSpringWithDamping: 0.5, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
             carryingView.layer.position = self!.beginLocation
             carryingView.transform = CGAffineTransformIdentity
@@ -111,6 +97,18 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
             }, completion: {[weak self] (finished:Bool)->Void in
                 self!.privateInstance.previousTranslation = CGPoint()
         })
+
+    }
+    
+    
+    override func didAppear(#carryingView:GZFlingCarryingView){
+        
+//        UIView.animateWithDuration(0.15, animations: {[weak self] () -> Void in
+//            carryingView.layer.position = self!.beginLocation
+//            carryingView.transform = CGAffineTransformIdentity
+//        })
+        
+        
         
     }
     

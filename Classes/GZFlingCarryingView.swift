@@ -14,6 +14,7 @@ public class GZFlingCarryingView: UIView {
     public var flingView:GZFlingView!
     
     @IBOutlet public var customView:UIView! = UIView(){
+        
         willSet{
             
             if (newValue != customView) {
@@ -38,7 +39,7 @@ public class GZFlingCarryingView: UIView {
         self.customView = customView
         self.addSubview(customView)
     }
-
+    
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -53,8 +54,10 @@ public class GZFlingCarryingView: UIView {
     }
     
     deinit{
-//        GZDebugLog("GZFlingCarryingView is deinit")
+        //        GZDebugLog("GZFlingCarryingView is deinit")
         
     }
     
+    
 }
+

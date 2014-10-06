@@ -38,12 +38,6 @@ public class GZFlingView: UIView {
         }
     }
     
-//    public var carryingViews:[GZFlingCarryingView]{
-//        get{
-//            return []
-//        }
-//    }
-    
     public var panGestureRecognizer:UIPanGestureRecognizer{
         return PrivateInstance.panGestureRecognizer
     }
@@ -223,9 +217,13 @@ public class GZFlingView: UIView {
         var currentCarryingView = (self.nodesQueue.currentNode?.carryingView)!
         var nextCarryingView = self.nodesQueue.currentNode.nextNode.carryingView
         
-        
         self.tellDelegateWillShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
-        self.animation.willAppear(carryingView: nextCarryingView)
+        
+        var velocity = self.panGestureRecognizer.velocityInView(self)
+
+        if CGPointEqualToPoint(velocity, CGPointZero) {
+            self.animation.willAppear(carryingView: nextCarryingView)
+        }
         
         self.animation.showChoosenAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
@@ -237,7 +235,9 @@ public class GZFlingView: UIView {
 
             weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
             
-            weakSelf.animation.didAppear(carryingView: nextCarryingView)
+            if CGPointEqualToPoint(velocity, CGPointZero) {
+                weakSelf.animation.didAppear(carryingView: nextCarryingView)
+            }
             
             PrivateInstance.counter++
         })
