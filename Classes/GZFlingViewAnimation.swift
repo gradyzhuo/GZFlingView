@@ -58,8 +58,8 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     var radomClosewise:CGFloat = -1
     
     var initalScaleValue : CGFloat = 0.95
+    
     lazy var initalTranslationY : CGFloat = {
-        
         var scale = 1-self.initalScaleValue
         return (self.flingView.bounds.height * scale )
     }()
@@ -173,7 +173,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{ ()-> Void in
 
-            currentCarryingView.layer.position.offset(translation.x*2, dy: translation.y*2)
+            currentCarryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
             currentCarryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise * 0.25)
             currentCarryingView.alpha = 0
             
