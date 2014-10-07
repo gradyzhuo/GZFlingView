@@ -128,8 +128,13 @@ class GZFlingNodesQueue{
     
     func enumerateObjectsUsingBlock(block:(node:GZFlingNode, idx:Int, isEnded:UnsafeMutablePointer<Bool>)->Void){
         
+        
+        if self.size == 0 {
+            return
+        }
+        
+        
         var isEndedPtr = false
-//        isEndedPtr.memory = false
         
         var rearNode = self.rearNode
         var node = self.frontNode

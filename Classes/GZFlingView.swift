@@ -159,11 +159,11 @@ public class GZFlingView: UIView {
             if let carryingView = self.dataSource?.carryingViewForReusingAtIndexInFlingView(self, carryingViewForReusingAtIndex: index) {
                 
                 self.addSubview(carryingView)
-                self.sendSubviewToBack(carryingView)
                 
                 carryingView.frame = self.bounds
                 carryingView.flingIndex = index
                 carryingView.flingView = self
+                carryingView.layer.shouldRasterize = true
                 
                 self.askDatasourceForNeedShow(forCarryingView: carryingView, atIndex: index)
                 
@@ -204,9 +204,10 @@ public class GZFlingView: UIView {
     
     private func nodeByCarryingView(carryingView:GZFlingCarryingView) -> GZFlingNode?{
         var resultNode:GZFlingNode? = nil
-        self.nodesQueue.enumerateObjectsUsingBlock { (node:GZFlingNode, idx, isEnded) -> Void in
+        self.nodesQueue.enumerateObjectsUsingBlock { (node:GZFlingNode, idx, isEnded:UnsafeMutablePointer<Bool>) -> Void in
             if node.carryingView == carryingView {
                 resultNode = node
+                isEnded.memory = true
             }
         }
         return resultNode

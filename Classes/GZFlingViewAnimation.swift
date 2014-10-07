@@ -57,7 +57,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     var radomClosewise:CGFloat = -1
     
-    var initalScaleValue : CGFloat = 0.95
+    var initalScaleValue : CGFloat = 0.90
     
     lazy var initalTranslationY : CGFloat = {
         var scale = 1-self.initalScaleValue
@@ -136,6 +136,8 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         var transform = CGAffineTransformMakeTranslation(0, max(self.initalTranslationY-transformSubractor, 0))
         transform = CGAffineTransformScale(transform, scale, scale)
         nextCarryingView.transform = transform
+        
+        
         
         self.privateInstance.previousTranslation = translation
     }
