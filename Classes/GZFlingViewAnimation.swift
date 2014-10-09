@@ -20,6 +20,7 @@ public class GZFlingViewAnimation {
     
     var flingView:GZFlingView!
     var beginLocation:CGPoint = CGPoint()
+    var nodesQueue:GZFlingNodesQueue!
     
     init(){
         
@@ -57,8 +58,8 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     var radomClosewise:CGFloat = -1
     
-    var initalScaleValue : CGFloat = 0.90
-    var secondInitalScaleValue : CGFloat = 0.95
+    var initalScaleValue : CGFloat = 0.95
+    var secondInitalScaleValue : CGFloat = 0.975
     var targetScaleValue:CGFloat = 1.0
     
     lazy var initalTranslationY : CGFloat = {
@@ -88,7 +89,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         }()
     
     lazy var secondDistanceY:CGFloat = {
-        var scale = self.secondInitalScaleValue-self.initalScaleValue
+        var scale = self.targetScaleValue-self.secondInitalScaleValue
         return (self.flingView.bounds.height * scale )
         }()
 
@@ -117,7 +118,6 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         UIView.animateWithDuration(0.2, delay: 0.06, usingSpringWithDamping: 0.5, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
-//            carryingView.layer.position = self!.beginLocation
             carryingView.transform = CGAffineTransformIdentity
             
             var nextCarryingView:GZFlingCarryingView! = self!.flingView.nextCarryingView(fromCarryingView: carryingView)
@@ -158,7 +158,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         //最二層 到 最上層
         
-        var nextCarryingView:GZFlingCarryingView! = self.flingView.nextCarryingView(fromCarryingView: carryingView)
+        var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: carryingView)
         
         //scaleAdder:計算要在初始化增加的scale的量
         var scaleAdder = (self.targetScaleValue - self.secondInitalScaleValue) * percent
@@ -173,7 +173,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         //最底層 到 第二層
         
-        var nextNextCarryingView:GZFlingCarryingView! = self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
+        var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
         
         var nextScaleAdder = (self.secondInitalScaleValue-self.initalScaleValue) * percent
         var nextScale = self.initalScaleValue+nextScaleAdder
@@ -183,8 +183,6 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         var nextTransform = CGAffineTransformMakeTranslation(0, max(self.initalTranslationY-nextTransformSubractor, 0))
         nextTransform = CGAffineTransformScale(nextTransform, nextScale, nextScale)
         nextNextCarryingView.transform = nextTransform
-        
-        
         
         
         self.privateInstance.previousTranslation = translation
@@ -198,7 +196,8 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     override func showCancelAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
         
         var currentCarryingView = self.flingView.topCarryingView
-        var nextCarryingView:GZFlingCarryingView! = self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
+        var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
+        var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
         
         UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations: {[weak self] () -> Void in
             
@@ -207,6 +206,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
             
             nextCarryingView.transform = self!.secondInitialTransforms
             
+            nextNextCarryingView.transform = self!.initialTransforms
             
             }, completion: {[weak self] (finished:Bool)->Void in
                 
@@ -220,12 +220,25 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     override func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
 
         var currentCarryingView = self.flingView.topCarryingView
+        var nextCarryingView = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
+        
+//        var animationGroup = CAAnimationGroup()
+//        
+//        var transformAnimation = CABasicAnimation(keyPath: "transform")
+//        transformAnimation.fromValue = CGAffineTransformMakeRotation(self.radomClosewise * 0.25)
+//        
+//        
+//        animationGroup.animations = [transformAnimation]
+//        
+//        currentCarryingView.layer.addAnimation(animationGroup, forKey: "transform")
+        
         
         UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{[weak self] ()-> Void in
 
             currentCarryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
             currentCarryingView.transform = CGAffineTransformMakeRotation(self!.radomClosewise * 0.25)
             currentCarryingView.alpha = 0
+            
             
             }) {[weak self](finished:Bool)->Void in
                 

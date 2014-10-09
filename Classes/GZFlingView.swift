@@ -193,6 +193,7 @@ public class GZFlingView: UIView {
     func initialize(){
         self.prepareGestures()
         self.animation.flingView = self
+        self.animation.nodesQueue = self.nodesQueue
     }
     
     
@@ -221,7 +222,7 @@ public class GZFlingView: UIView {
         self.tellDelegateWillShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
         
         var velocity = self.panGestureRecognizer.velocityInView(self)
-
+        
         if CGPointEqualToPoint(velocity, CGPointZero) {
             self.animation.willAppear(carryingView: nextCarryingView)
         }
@@ -275,11 +276,12 @@ extension GZFlingView : UIGestureRecognizerDelegate {
         PrivateInstance.translation = translation
         
         
-        self.animation.gesturePanning(gesture: gesture, translation: translation)
-        
-        self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
-        
-        if gesture.state == .Ended && !PrivateInstance.overEnd {
+        if gesture.state == .Changed {
+            self.animation.gesturePanning(gesture: gesture, translation: translation)
+            
+            self.tellDelegateDidDrag(carryingView: self.topCarryingView, contentOffset: translation)
+        }
+        else if gesture.state == .Ended && !PrivateInstance.overEnd {
             
             self.tellDelegateDidEndDragging(carryingView: self.topCarryingView)
             
