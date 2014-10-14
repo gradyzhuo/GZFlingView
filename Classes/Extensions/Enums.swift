@@ -13,24 +13,9 @@ import UIKit
 
 public enum GZFlingViewSwipingDirection:Int{
     
-    case Left = 0
+    case Left = -1
     case Right = 1
     case Undefined = 2
-    
-    public init(rawValue:Int){
-        
-        switch rawValue {
-            
-        case 0 :
-            self = .Left
-        case 1 :
-            self = .Right
-        default:
-            self = .Undefined
-            
-        }
-        
-    }
     
     public var description:String{
         get{
