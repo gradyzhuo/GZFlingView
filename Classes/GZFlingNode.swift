@@ -126,6 +126,14 @@ class GZFlingNodesQueue{
         return nextNode
     }
     
+    func preNext() -> GZFlingNode {
+        
+        var nextNode:GZFlingNode = (self.currentNode?.nextNode)!
+        self.privateQueueInstance.currentNode = nextNode
+        
+        return nextNode
+    }
+    
     func enumerateObjectsUsingBlock(block:(node:GZFlingNode, idx:Int, isEnded:UnsafeMutablePointer<Bool>)->Void){
         
         
@@ -146,7 +154,7 @@ class GZFlingNodesQueue{
             
             node = node.nextNode
             
-        }while node != self.frontNode
+        }while (node != self.frontNode) && (!isEndedPtr)
         
     }
     
