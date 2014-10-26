@@ -14,9 +14,9 @@ public class GZFlingView: UIView {
     /**
         (readonly)
     */
-    public  var topCarryingView : GZFlingCarryingView!{
+    public  var topCarryingView : GZFlingCarryingView?{
         get{
-            return self.nodesQueue.frontNode.carryingView //self.nodesQueue.currentNode?.carryingView
+            return self.nodesQueue.frontNode?.carryingView //self.nodesQueue.currentNode?.carryingView
         }
     }
     
@@ -113,7 +113,7 @@ public class GZFlingView: UIView {
     
     public func choose(direction:GZFlingViewSwipingDirection, completionHandelr:((finished:Bool) -> Void)?){
         
-        if PrivateInstance.overEnd  {
+        if PrivateInstance.overEnd || self.topCarryingView == nil  {
             return
         }
         
@@ -158,6 +158,12 @@ public class GZFlingView: UIView {
             
             if let carryingView = self.dataSource?.carryingViewForReusingAtIndexInFlingView(self, carryingViewForReusingAtIndex: index) {
                 
+
+                if self.askDatasourceShouldEnd(atIndex: index) && index == 0{
+                    break
+                }
+                
+                
                 self.addSubview(carryingView)
                 
                 carryingView.frame = self.bounds
@@ -166,23 +172,26 @@ public class GZFlingView: UIView {
                 carryingView.layer.shouldRasterize = true
                 
                 self.askDatasourceForNeedShow(forCarryingView: carryingView, atIndex: index)
-                
                 self.nodesQueue += GZFlingNode(carryingView: carryingView)
+                
+                PrivateInstance.counter++
                 
             }
             
-            PrivateInstance.counter++
-            
         }
         
-        if numberOfCarryingViews > 0 {
+        if self.nodesQueue.size > 0 {
+            
             self.animation.willAppear(carryingView: self.topCarryingView)
             self.animation.didAppear(carryingView: self.topCarryingView)
+            
             
             self.tellDelegateWillShow(carryingView: self.topCarryingView, atFlingIndex: 0)
             self.tellDelegateDidShow(carryingView: self.topCarryingView, atFlingIndex: 0)
             
         }
+        
+        
         
         
         
@@ -235,9 +244,13 @@ public class GZFlingView: UIView {
             
             weakSelf.tellDelegateDidChooseCarryingView(carryingView: currentCarryingView)
             
-            weakSelf.askDatasourceForNeedShow(forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
+            if !weakSelf.askDatasourceShouldEnd(atIndex: PrivateInstance.counter) {
+                weakSelf.askDatasourceForNeedShow(forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
+                weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+            }
+            
 
-            weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+            
             
             if CGPointEqualToPoint(velocity, CGPointZero) {
                 weakSelf.animation.didAppear(carryingView: nextCarryingView)
@@ -327,7 +340,7 @@ extension GZFlingView : UIGestureRecognizerDelegate {
 //MARK: - Delegate Method Support
 extension GZFlingView {
     
-    func tellDelegateDidEndDragging(#carryingView:GZFlingCarryingView){
+    func tellDelegateDidEndDragging(#carryingView:GZFlingCarryingView!){
     
         self.animation.didEndGesture(gesture: self.panGestureRecognizer)
         
@@ -337,7 +350,7 @@ extension GZFlingView {
         
     }
     
-    func tellDelegateWillCancelChoosingCarryingView(#carryingView:GZFlingCarryingView){
+    func tellDelegateWillCancelChoosingCarryingView(#carryingView:GZFlingCarryingView!){
         
         if let delegateMethod = self.delegate?.flingViewWillCancelChooseCarryingView {
             
@@ -347,7 +360,7 @@ extension GZFlingView {
 
     }
     
-    func tellDelegateDidCancelChoosingCarryingView(#carryingView:GZFlingCarryingView){
+    func tellDelegateDidCancelChoosingCarryingView(#carryingView:GZFlingCarryingView!){
         
         if let delegateMethod = self.delegate?.flingViewDidCancelChooseCarryingView {
             
@@ -358,7 +371,7 @@ extension GZFlingView {
         
     }
     
-    func tellDelegateDidChooseCarryingView(#carryingView:GZFlingCarryingView){
+    func tellDelegateDidChooseCarryingView(#carryingView:GZFlingCarryingView!){
         
         if let delegateMethod = self.delegate?.flingViewDidChooseCarryingView {
             
@@ -368,7 +381,7 @@ extension GZFlingView {
 
     }
     
-    func tellDelegateWillBeginDragging(#carryingView:GZFlingCarryingView){
+    func tellDelegateWillBeginDragging(#carryingView:GZFlingCarryingView!){
         
         if let delegateMethod = self.delegate?.flingViewWillBeginDraggingCarryingView {
             delegateMethod(self, withCarryingView: carryingView)
@@ -376,7 +389,7 @@ extension GZFlingView {
         
     }
     
-    func tellDelegateDidDrag(#carryingView:GZFlingCarryingView, contentOffset:CGPoint){
+    func tellDelegateDidDrag(#carryingView:GZFlingCarryingView!, contentOffset:CGPoint){
         
         
         if let delegateMethod = self.delegate?.flingViewDidDragCarryingView {
@@ -385,7 +398,7 @@ extension GZFlingView {
         
     }
     
-    func tellDelegateWillShow(#carryingView:GZFlingCarryingView, atFlingIndex index:Int){
+    func tellDelegateWillShow(#carryingView:GZFlingCarryingView!, atFlingIndex index:Int){
         
         if self.isEnded {
             return
@@ -393,16 +406,19 @@ extension GZFlingView {
         
         if let delegateMethod = self.delegate?.flingViewWillShowCarryingView {
             delegateMethod(self, willShowCarryingView: carryingView, atFlingIndex: index)
-
+            
         }
+        
 
         
     }
     
-    func tellDelegateDidShow(#carryingView:GZFlingCarryingView, atFlingIndex index:Int){
-        
+    func shouldTellDelegateDidArriveOrOverEnd(atFlingIndex index:Int)->Bool{
+        var didArriveEnd = false
         
         if PrivateInstance.arriveEnd {
+            
+            didArriveEnd = true
             
             if let delegateMethod = self.delegate?.flingViewWillArriveEndIndex  {
                 delegateMethod(self, atIndex: index)
@@ -410,43 +426,58 @@ extension GZFlingView {
             
         }else if PrivateInstance.overEnd {
             
+            didArriveEnd = true
+            
             if let delegateMethod = self.delegate?.flingViewDidArriveEndIndex {
                 delegateMethod(self, atIndex: index)
             }
             
-        }else{
+        }
+        return didArriveEnd
+    }
+    
+    func tellDelegateDidShow(#carryingView:GZFlingCarryingView!, atFlingIndex index:Int){
+        
+        if !self.shouldTellDelegateDidArriveOrOverEnd(atFlingIndex: index){
             if let delegateMethod = self.delegate?.flingViewDidShowCarryingView {
                 delegateMethod(self, didShowCarryingView: carryingView, atFlingIndex: index)
             }
         }
-
         
     }
     
+    func askDatasourceShouldEnd(atIndex index:Int)->Bool{
+        
+        var shouldEnd = false
+        
+        if let shouldEndMethod = self.dataSource?.flingViewShouldEnd {
+            
+            shouldEnd = shouldEndMethod(self, atFlingIndex: index)
+            
+            PrivateInstance.predictEndIndex = shouldEnd ? PrivateInstance.predictEndIndex : index
+            
+        }
+        
+        return shouldEnd
+        
+    }
     
-    
-    func askDatasourceForNeedShow(forCarryingView carryingView:GZFlingCarryingView, atIndex index:Int){
+    func askDatasourceForNeedShow(forCarryingView carryingView:GZFlingCarryingView!, atIndex index:Int){
         
         self.sendSubviewToBack(carryingView)
         
         carryingView.flingIndex = index
         
-        if let shouldNeedShowMethod = self.dataSource?.flingViewShouldEnd {
-            if shouldNeedShowMethod(self, atFlingIndex: index) {
-                
-                PrivateInstance.predictEndIndex = index
-                
-                self.animation.prepare(carryingView: carryingView, reuseIndex: index)
-                
-                carryingView.alpha = 1.0
-                carryingView.prepareForReuse()
-                
-                if let prepareMethod = self.dataSource?.flingViewPrepareCarryingView {
-                    prepareMethod(self, preparingCarryingView: carryingView, atFlingIndex: index)
-                }
-
-            }
+        self.animation.prepare(carryingView: carryingView, reuseIndex: index)
+        
+        carryingView.alpha = 1.0
+        carryingView.prepareForReuse()
+        
+        
+        if let prepareMethod = self.dataSource?.flingViewPrepareCarryingView {
+            prepareMethod(self, preparingCarryingView: carryingView, atFlingIndex: index)
         }
+
         
     }
 

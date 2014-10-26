@@ -36,11 +36,11 @@ public class GZFlingViewAnimation {
         //pass
     }
     
-    func willAppear(#carryingView:GZFlingCarryingView){
+    func willAppear(#carryingView:GZFlingCarryingView!){
         //pass
     }
     
-    func didAppear(#carryingView:GZFlingCarryingView){
+    func didAppear(#carryingView:GZFlingCarryingView!){
         //pass
     }
 
@@ -114,13 +114,14 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
     }
     
-    override func willAppear(#carryingView:GZFlingCarryingView){
+    override func willAppear(#carryingView:GZFlingCarryingView!){
         
         UIView.animateWithDuration(0.2, delay: 0.06, usingSpringWithDamping: 0.5, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
             carryingView.transform = CGAffineTransformIdentity
             
             var nextCarryingView:GZFlingCarryingView! = self!.flingView.nextCarryingView(fromCarryingView: carryingView)
+            
             nextCarryingView.transform = self!.secondInitialTransforms
             
             
@@ -128,16 +129,11 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
                 self!.privateInstance.previousTranslation = CGPoint()
         })
 
+        
     }
     
     
-    override func didAppear(#carryingView:GZFlingCarryingView){
-        
-//        UIView.animateWithDuration(0.15, animations: {[weak self] () -> Void in
-//            carryingView.layer.position = self!.beginLocation
-//            carryingView.transform = CGAffineTransformIdentity
-//        })
-        
+    override func didAppear(#carryingView:GZFlingCarryingView!){
         
         
     }
@@ -148,44 +144,50 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     override func gesturePanning(#gesture: UIPanGestureRecognizer, translation: CGPoint) {
         
-        var carryingView = self.flingView.topCarryingView
+        if let carryingView = self.flingView.topCarryingView{
+            
+            var percent = fabs(translation.x / self.maxWidthForFling)
+            percent = min(percent, 1.0)
+            
+            carryingView.layer.position = self.beginLocation.pointByOffsetting(translation.x, dy: translation.y)
+            carryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise*fabs(translation.x)/100*0.1)
+            
+            //最二層 到 最上層
+            
+            var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: carryingView)
+            
+            //scaleAdder:計算要在初始化增加的scale的量
+            var scaleAdder = (self.targetScaleValue - self.secondInitalScaleValue) * percent
+            var scale = self.secondInitalScaleValue+scaleAdder
+            
+            var transformSubractor = self.secondDistanceY*percent
+            
+            var transform = CGAffineTransformMakeTranslation(0, max(self.secondInitalTranslationY-transformSubractor, 0))
+            transform = CGAffineTransformScale(transform, scale, scale)
+            nextCarryingView.transform = transform
+            
+            
+            //最底層 到 第二層
+            
+            var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
+            
+            var nextScaleAdder = (self.secondInitalScaleValue-self.initalScaleValue) * percent
+            var nextScale = self.initalScaleValue+nextScaleAdder
+            
+            var nextTransformSubractor = self.distanceY*percent
+            
+            var nextTransform = CGAffineTransformMakeTranslation(0, max(self.initalTranslationY-nextTransformSubractor, 0))
+            nextTransform = CGAffineTransformScale(nextTransform, nextScale, nextScale)
+            nextNextCarryingView.transform = nextTransform
+            
+            
+            self.privateInstance.previousTranslation = translation
+            
+        }
         
-        var percent = fabs(translation.x / self.maxWidthForFling)
-        percent = min(percent, 1.0)
-        
-        carryingView.layer.position = self.beginLocation.pointByOffsetting(translation.x, dy: translation.y)
-        carryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise*fabs(translation.x)/100*0.1)
-        
-        //最二層 到 最上層
-        
-        var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: carryingView)
-        
-        //scaleAdder:計算要在初始化增加的scale的量
-        var scaleAdder = (self.targetScaleValue - self.secondInitalScaleValue) * percent
-        var scale = self.secondInitalScaleValue+scaleAdder
-        
-        var transformSubractor = self.secondDistanceY*percent
-        
-        var transform = CGAffineTransformMakeTranslation(0, max(self.secondInitalTranslationY-transformSubractor, 0))
-        transform = CGAffineTransformScale(transform, scale, scale)
-        nextCarryingView.transform = transform
+//        var carryingView = self.flingView.topCarryingView
         
         
-        //最底層 到 第二層
-        
-        var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
-        
-        var nextScaleAdder = (self.secondInitalScaleValue-self.initalScaleValue) * percent
-        var nextScale = self.initalScaleValue+nextScaleAdder
-        
-        var nextTransformSubractor = self.distanceY*percent
-        
-        var nextTransform = CGAffineTransformMakeTranslation(0, max(self.initalTranslationY-nextTransformSubractor, 0))
-        nextTransform = CGAffineTransformScale(nextTransform, nextScale, nextScale)
-        nextNextCarryingView.transform = nextTransform
-        
-        
-        self.privateInstance.previousTranslation = translation
     }
     
     override func didEndGesture(#gesture: UIPanGestureRecognizer) {
@@ -195,56 +197,64 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     override func showCancelAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
         
-        var currentCarryingView = self.flingView.topCarryingView
-        var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
-        var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
+        if let currentCarryingView = self.flingView.topCarryingView {
+//            var currentCarryingView = self.flingView.topCarryingView
+            var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
+            var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
+            
+            UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations: {[weak self] () -> Void in
+                
+                currentCarryingView.layer.position = self!.beginLocation
+                currentCarryingView.transform = CGAffineTransformIdentity
+                
+                nextCarryingView.transform = self!.secondInitialTransforms
+                
+                nextNextCarryingView.transform = self!.initialTransforms
+                
+                }, completion: {[weak self] (finished:Bool)->Void in
+                    
+                    //                self!.privateInstance.previousTranslation = CGPoint()
+                    
+                    completionHandler(finished: finished)
+                    
+            })
+
+        }
         
-        UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations: {[weak self] () -> Void in
-            
-            currentCarryingView.layer.position = self!.beginLocation
-            currentCarryingView.transform = CGAffineTransformIdentity
-            
-            nextCarryingView.transform = self!.secondInitialTransforms
-            
-            nextNextCarryingView.transform = self!.initialTransforms
-            
-            }, completion: {[weak self] (finished:Bool)->Void in
-                
-//                self!.privateInstance.previousTranslation = CGPoint()
-                
-                completionHandler(finished: finished)
-                
-        })
     }
     
     override func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
 
-        var currentCarryingView = self.flingView.topCarryingView
-        var nextCarryingView = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
-        
-//        var animationGroup = CAAnimationGroup()
-//        
-//        var transformAnimation = CABasicAnimation(keyPath: "transform")
-//        transformAnimation.fromValue = CGAffineTransformMakeRotation(self.radomClosewise * 0.25)
-//        
-//        
-//        animationGroup.animations = [transformAnimation]
-//        
-//        currentCarryingView.layer.addAnimation(animationGroup, forKey: "transform")
-        
-        
-        UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{[weak self] ()-> Void in
+        if let currentCarryingView = self.flingView.topCarryingView {
+//            var currentCarryingView = self.flingView.topCarryingView
+            var nextCarryingView = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
+            
+            //        var animationGroup = CAAnimationGroup()
+            //
+            //        var transformAnimation = CABasicAnimation(keyPath: "transform")
+            //        transformAnimation.fromValue = CGAffineTransformMakeRotation(self.radomClosewise * 0.25)
+            //
+            //
+            //        animationGroup.animations = [transformAnimation]
+            //
+            //        currentCarryingView.layer.addAnimation(animationGroup, forKey: "transform")
+            
+            
+            UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{[weak self] ()-> Void in
+                
+                currentCarryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
+                currentCarryingView.transform = CGAffineTransformMakeRotation(self!.radomClosewise * 0.25)
+                currentCarryingView.alpha = 0
+                
+                
+                }) {[weak self](finished:Bool)->Void in
+                    
+                    completionHandler(finished: finished)
+                    
+            }
 
-            currentCarryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
-            currentCarryingView.transform = CGAffineTransformMakeRotation(self!.radomClosewise * 0.25)
-            currentCarryingView.alpha = 0
-            
-            
-            }) {[weak self](finished:Bool)->Void in
-                
-                completionHandler(finished: finished)
-                
         }
+        
         
     }
 

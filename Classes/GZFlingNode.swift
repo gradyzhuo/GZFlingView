@@ -17,7 +17,7 @@ class GZFlingNodesQueue{
     /**
     (readonly)
     */
-    internal var frontNode:GZFlingNode!{
+    internal var frontNode:GZFlingNode?{
         get{
             return self.privateQueueInstance.frontNode
         }
@@ -145,13 +145,12 @@ class GZFlingNodesQueue{
         var isEndedPtr = false
         
         var rearNode = self.rearNode
-        var node = self.frontNode
+        var node = self.frontNode!
         var idx = 0
         
         do{
             
             block(node: node, idx: idx++, isEnded: &isEndedPtr)
-            
             node = node.nextNode
             
         }while (node != self.frontNode) && (!isEndedPtr)
@@ -159,12 +158,14 @@ class GZFlingNodesQueue{
     }
     
     func reset(){
+        
         if self.size == 0 {
             return
         }
+        
         self.rearNode.privateInstance.nextNode = nil
         
-        var node = self.frontNode
+        var node:GZFlingNode! = self.frontNode
         
         self.privateQueueInstance.frontNode = nil
         self.privateQueueInstance.rearNode = nil
