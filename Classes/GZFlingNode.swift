@@ -61,8 +61,6 @@ class GZFlingNodesQueue{
         }
     }
     
-    
-    
     init(){
         
         self.privateQueueInstance = PrivateQueueInstance()
@@ -122,14 +120,6 @@ class GZFlingNodesQueue{
         
         self.privateQueueInstance.rearNode = self.rearNode?.nextNode
         self.privateQueueInstance.frontNode = self.frontNode?.nextNode
-        
-        return nextNode
-    }
-    
-    func preNext() -> GZFlingNode {
-        
-        var nextNode:GZFlingNode = (self.currentNode?.nextNode)!
-        self.privateQueueInstance.currentNode = nextNode
         
         return nextNode
     }
@@ -206,10 +196,8 @@ class GZFlingNodesQueue{
 }
 
 
+//MARK: -
 class GZFlingNode : NSObject, NSCopying {
-    
-    // MARK: SubClass Define
-    
     
     // MARK: Properties
     
@@ -229,6 +217,12 @@ class GZFlingNode : NSObject, NSCopying {
         return self.privateInstance.carryingView
     }
     
+    /**
+        (readonly)
+    */
+    var flingIndex:Int{
+        return self.carryingView.flingIndex
+    }
     
     private var privateInstance:PrivateInstance
     

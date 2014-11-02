@@ -38,15 +38,26 @@ public class GZFlingCarryingView: UIView {
         
         self.customView = customView
         self.addSubview(customView)
+        
+        self.initialize()
     }
     
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
+        
+        self.initialize()
     }
     
     public required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        
+        self.initialize()
+        
+    }
+    
+    func initialize(){
+        self.layer.shouldRasterize = true
     }
     
     public func prepareForReuse(){
