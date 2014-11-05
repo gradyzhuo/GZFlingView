@@ -42,8 +42,8 @@ public class GZFlingView: UIView {
         return PrivateInstance.panGestureRecognizer
     }
     
-    @IBOutlet public var dataSource: AnyObject?
-    @IBOutlet public var delegate: AnyObject?
+    @IBOutlet public weak var dataSource: AnyObject?
+    @IBOutlet public weak var delegate: AnyObject?
     
     public var isEnded:Bool{
         get{
@@ -238,29 +238,31 @@ public class GZFlingView: UIView {
         
         self.animation.showChoosenAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
-            
-            
-            var weakSelf = self!
-            
-            weakSelf.tellDelegateDidChooseCarryingView(carryingView: currentCarryingView)
-            
-            if !weakSelf.askDatasourceShouldEnd(atIndex: PrivateInstance.counter) {
-                weakSelf.askDatasourceForNeedShow(forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
-                weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
-            }
-            
+            if let weakSelf = self {
+                
+                weakSelf.tellDelegateDidChooseCarryingView(carryingView: currentCarryingView)
+                
+                if !weakSelf.askDatasourceShouldEnd(atIndex: PrivateInstance.counter) {
+                    weakSelf.askDatasourceForNeedShow(forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
+                    weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+                }
+                
+                
+                
+                
+                if CGPointEqualToPoint(velocity, CGPointZero) {
+                    weakSelf.animation.didAppear(carryingView: nextCarryingView)
+                }
+                
+                PrivateInstance.counter++
+                
+                if let handler = completionHandelr {
+                    handler(finished: finished)
+                }
 
-            
-            
-            if CGPointEqualToPoint(velocity, CGPointZero) {
-                weakSelf.animation.didAppear(carryingView: nextCarryingView)
             }
             
-            PrivateInstance.counter++
             
-            if let handler = completionHandelr {
-                handler(finished: finished)
-            }
         })
         
         PrivateInstance.topIndex = nextCarryingView.flingIndex
@@ -278,7 +280,10 @@ public class GZFlingView: UIView {
         
         self.animation.showCancelAnimation(direction: direction, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
-            self!.tellDelegateDidCancelChoosingCarryingView(carryingView: self!.topCarryingView)
+            if let weakSelf = self{
+                weakSelf.tellDelegateDidCancelChoosingCarryingView(carryingView: weakSelf.topCarryingView)
+            }
+            
         })
         
     }

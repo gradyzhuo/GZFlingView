@@ -118,15 +118,24 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         UIView.animateWithDuration(0.2, delay: 0.06, usingSpringWithDamping: 0.5, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
-            carryingView.transform = CGAffineTransformIdentity
             
-            var nextCarryingView:GZFlingCarryingView! = self!.flingView.nextCarryingView(fromCarryingView: carryingView)
+            if let weakSelf = self {
+                carryingView.transform = CGAffineTransformIdentity
+                
+                var nextCarryingView:GZFlingCarryingView! = weakSelf.flingView.nextCarryingView(fromCarryingView: carryingView)
+                
+                nextCarryingView.transform = weakSelf.secondInitialTransforms
+            }
             
-            nextCarryingView.transform = self!.secondInitialTransforms
+            
             
             
             }, completion: {[weak self] (finished:Bool)->Void in
-                self!.privateInstance.previousTranslation = CGPoint()
+                
+                if let weakSelf = self {
+                    weakSelf.privateInstance.previousTranslation = CGPoint()
+                }
+                
         })
 
         
@@ -204,16 +213,20 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
             
             UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations: {[weak self] () -> Void in
                 
-                currentCarryingView.layer.position = self!.beginLocation
-                currentCarryingView.transform = CGAffineTransformIdentity
-                
-                nextCarryingView.transform = self!.secondInitialTransforms
-                
-                nextNextCarryingView.transform = self!.initialTransforms
-                
-                }, completion: {[weak self] (finished:Bool)->Void in
+                if let weakSefl = self {
                     
-                    //                self!.privateInstance.previousTranslation = CGPoint()
+                    currentCarryingView.layer.position = weakSefl.beginLocation
+                    currentCarryingView.transform = CGAffineTransformIdentity
+                    
+                    nextCarryingView.transform = weakSefl.secondInitialTransforms
+                    
+                    nextNextCarryingView.transform = weakSefl.initialTransforms
+                    
+                }
+                
+                
+                
+            }, completion: {[weak self] (finished:Bool)->Void in
                     
                     completionHandler(finished: finished)
                     
@@ -242,9 +255,13 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
             
             UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{[weak self] ()-> Void in
                 
-                currentCarryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
-                currentCarryingView.transform = CGAffineTransformMakeRotation(self!.radomClosewise * 0.25)
-                currentCarryingView.alpha = 0
+                if let weakSelf = self {
+                    
+                    currentCarryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
+                    currentCarryingView.transform = CGAffineTransformMakeRotation(weakSelf.radomClosewise * 0.25)
+                    currentCarryingView.alpha = 0
+                    
+                }
                 
                 
                 }) {[weak self](finished:Bool)->Void in
