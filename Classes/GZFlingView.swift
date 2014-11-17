@@ -152,7 +152,7 @@ public class GZFlingView: UIView {
         PrivateInstance.reset()
         self.nodesQueue.reset()
         
-        var numberOfCarryingViews:Int = self.dataSource!.numberOfCarryingViewsForReusingInFlingView(self)
+        var numberOfCarryingViews:Int = (self.dataSource?.numberOfCarryingViewsForReusingInFlingView(self)) ?? 0
         
         for index in 0..<numberOfCarryingViews {
             

@@ -101,7 +101,7 @@ class GZFlingNodesQueue{
         
         if let frontNode = self.privateQueueInstance.frontNode {
             copy.privateInstance.nextNode = frontNode
-            self.privateQueueInstance.rearNode!.privateInstance.nextNode = copy
+            self.privateQueueInstance.rearNode?.privateInstance.nextNode = copy
             self.privateQueueInstance.rearNode = copy
             
         }else{
