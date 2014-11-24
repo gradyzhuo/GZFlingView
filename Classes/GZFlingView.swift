@@ -9,7 +9,7 @@
 import UIKit
 
 public class GZFlingView: UIView {
-
+ 
     //MARK: - Properties Declare
     /**
         (readonly)
