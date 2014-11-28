@@ -120,15 +120,18 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         UIView.animateWithDuration(0.2, delay: 0.06, usingSpringWithDamping: 0.5, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
-            carryingView.transform = CGAffineTransformIdentity
             
+
             var nextCarryingView:GZFlingCarryingView! = node.nextNode.carryingView
             
-            nextCarryingView.transform = self!.secondInitialTransforms
             
             
             }, completion: {[weak self] (finished:Bool)->Void in
-                self!.privateInstance.previousTranslation = CGPoint()
+                
+                if let weakSelf = self {
+                    weakSelf.privateInstance.previousTranslation = CGPoint()
+                }
+                
         })
 
         
@@ -232,7 +235,6 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
             }) {[weak self](finished:Bool)->Void in
                 
                 completionHandler(finished: finished)
-                
         }
 
         

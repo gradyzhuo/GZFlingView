@@ -9,7 +9,7 @@
 import UIKit
 
 public class GZFlingView: UIView {
-
+ 
     //MARK: - Properties Declare
     
     /**
@@ -43,8 +43,8 @@ public class GZFlingView: UIView {
         return self.privateInstance.panGestureRecognizer
     }
     
-    @IBOutlet public var dataSource: AnyObject?
-    @IBOutlet public var delegate: AnyObject?
+    @IBOutlet public weak var dataSource: AnyObject?
+    @IBOutlet public weak var delegate: AnyObject?
     
     public var isEnded:Bool{
         get{
@@ -150,7 +150,7 @@ public class GZFlingView: UIView {
         self.privateInstance.reset()
         self.reusedNodesQueue.reset()
         
-        var numberOfCarryingViews:Int = self.dataSource!.numberOfCarryingViewsForReusingInFlingView(self)
+        var numberOfCarryingViews:Int = (self.dataSource?.numberOfCarryingViewsForReusingInFlingView(self)) ?? 0
         
         for index in 0 ..< numberOfCarryingViews {
             
@@ -221,6 +221,7 @@ public class GZFlingView: UIView {
             self.animation.willAppear(node: currentNode)
         }
         
+
         
         println("weakSelf.privateInstance.counter:\(self.privateInstance.counter)")
         
@@ -261,7 +262,11 @@ public class GZFlingView: UIView {
         
         self.animation.showCancelAnimation(direction: direction, currentNode:topNode, translation: translation, completionHandler: {[weak self] (finished) -> Void in
             
-            self!.tellDelegateDidCancelChoosing(node: topNode)
+            if let weakSelf = self {
+                weakSelf.tellDelegateDidCancelChoosing(node: topNode)
+            }
+            
+
         })
         
     }

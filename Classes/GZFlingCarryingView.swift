@@ -18,7 +18,7 @@ public class GZFlingCarryingView: UIView {
         willSet{
             
             if (newValue != customView) {
-                self.customView!.removeFromSuperview()
+                self.customView?.removeFromSuperview()
             }
             
         }
@@ -69,6 +69,11 @@ public class GZFlingCarryingView: UIView {
         
     }
     
+    override public func drawRect(rect: CGRect) {
+        var context = UIGraphicsGetCurrentContext()
+        CGContextSetAllowsAntialiasing(context, true)
+        CGContextSetShouldAntialias(context, true)
+    }
     
 }
 
