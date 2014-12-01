@@ -111,7 +111,9 @@ public class GZFlingView: UIView {
         return node?.nextNode.carryingView
     }
     
-    public func choose(direction:GZFlingViewSwipingDirection, completionHandelr:((finished:Bool) -> Void)?){
+    public func choose(direction:GZFlingViewSwipingDirection, completionHandelr:((finished:Bool) -> Void)){
+        
+        println("PrivateInstance.overEnd:\(PrivateInstance.overEnd)")
         
         if PrivateInstance.overEnd || self.topCarryingView == nil  {
             return
@@ -223,7 +225,7 @@ public class GZFlingView: UIView {
         return resultNode
     }
     
-    func showChoosenAnimation(direction:GZFlingViewSwipingDirection, translation:CGPoint,completionHandelr:((finished:Bool) -> Void)?){
+    func showChoosenAnimation(direction:GZFlingViewSwipingDirection, translation:CGPoint,completionHandelr:((finished:Bool) -> Void) = {(finished:Bool)->Void in }){
         
         var currentCarryingView = (self.nodesQueue.currentNode?.carryingView)!
         var nextCarryingView = self.nodesQueue.currentNode.nextNode.carryingView
@@ -255,10 +257,8 @@ public class GZFlingView: UIView {
                 }
                 
                 PrivateInstance.counter++
-                
-                if let handler = completionHandelr {
-                    handler(finished: finished)
-                }
+               
+                completionHandelr(finished: finished)
 
             }
             
@@ -318,7 +318,10 @@ extension GZFlingView : UIGestureRecognizerDelegate {
             if self.animation.shouldCancel(direction: PrivateInstance.direction, translation: translation){
                 self.showCancelAnimation(self.direction, translation: translation)
             }else{
-                self.showChoosenAnimation(self.direction, translation: translation, completionHandelr: nil)
+                
+                self.showChoosenAnimation(self.direction, translation: translation, completionHandelr: { (finished) -> Void in
+                    
+                })
             }
             
         }
