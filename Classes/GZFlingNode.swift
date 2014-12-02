@@ -173,7 +173,7 @@ class GZFlingNodesQueue{
     
     
     func printLinkedList(){
-        GZDebugLog(self)
+//        GZDebugLog(self)
         
         var a = NSArray()
     }

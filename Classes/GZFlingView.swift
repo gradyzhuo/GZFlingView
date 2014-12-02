@@ -101,9 +101,9 @@ public class GZFlingView: UIView {
     
     override public func layoutSublayersOfLayer(layer: CALayer!) {
         
-        if SYSTEM_VERSION_LESS_THAN("8.0"){
-            self.layoutSubviews()
-        }
+//        if SYSTEM_VERSION_LESS_THAN("8.0"){
+//            self.layoutSubviews()
+//        }
         
         super.layoutSublayersOfLayer(layer)
     }
