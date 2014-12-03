@@ -61,6 +61,9 @@ public class GZFlingView: UIView {
     public var animation:GZFlingViewAnimation = GZFlingViewAnimationTinder()
     private var nodesQueue = GZFlingNodesQueue()
     
+    var countOfCarryingViews:Int{
+        return self.nodesQueue.size
+    }
     
     //MARK: - Public Methods
     
