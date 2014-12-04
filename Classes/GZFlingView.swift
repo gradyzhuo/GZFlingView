@@ -194,7 +194,6 @@ public class GZFlingView: UIView {
             
             self.tellDelegateWillShow(carryingView: self.topCarryingView, atFlingIndex: 0)
             self.tellDelegateDidShow(carryingView: self.topCarryingView, atFlingIndex: 0)
-            
         }
         
         
@@ -248,10 +247,17 @@ public class GZFlingView: UIView {
                 
                 weakSelf.tellDelegateDidChooseCarryingView(carryingView: currentCarryingView)
                 
+                
+                
+                weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+                
                 if !weakSelf.askDatasourceShouldEnd(atIndex: PrivateInstance.counter) {
+                    
                     weakSelf.askDatasourceForNeedShow(forCarryingView: currentCarryingView, atIndex: PrivateInstance.counter)
-                    weakSelf.tellDelegateDidShow(carryingView: nextCarryingView, atFlingIndex: nextCarryingView.flingIndex)
+                    
                 }
+                
+                currentCarryingView.flingIndex = PrivateInstance.counter
                 
                 
                 
@@ -268,6 +274,7 @@ public class GZFlingView: UIView {
             
             
         })
+        
         
         PrivateInstance.topIndex = nextCarryingView.flingIndex
         
@@ -342,7 +349,6 @@ extension GZFlingView : UIGestureRecognizerDelegate {
             self.animation.willBeginGesture(gesture: gestureRecognizer as UIPanGestureRecognizer)
             self.tellDelegateWillBeginDragging(carryingView: self.topCarryingView)
         }
-        
         
         return should
     }
@@ -420,25 +426,21 @@ extension GZFlingView {
             delegateMethod(self, willShowCarryingView: carryingView, atFlingIndex: index)
             
         }
-        
-
+    
         
     }
     
     func shouldTellDelegateDidArriveOrOverEnd(atFlingIndex index:Int)->Bool{
-        var didArriveEnd = false
+        
+        var didArriveEnd = self.isEnded
         
         if PrivateInstance.arriveEnd {
-            
-            didArriveEnd = true
             
             if let delegateMethod = self.delegate?.flingViewWillArriveEndIndex  {
                 delegateMethod(self, atIndex: index)
             }
             
         }else if PrivateInstance.overEnd {
-            
-            didArriveEnd = true
             
             if let delegateMethod = self.delegate?.flingViewDidArriveEndIndex {
                 delegateMethod(self, atIndex: index)
@@ -476,9 +478,9 @@ extension GZFlingView {
     
     func askDatasourceForNeedShow(forCarryingView carryingView:GZFlingCarryingView!, atIndex index:Int){
         
-        self.sendSubviewToBack(carryingView)
         
-        carryingView.flingIndex = index
+        
+        self.sendSubviewToBack(carryingView)
         
         self.animation.prepare(carryingView: carryingView, reuseIndex: index)
         
@@ -505,7 +507,7 @@ extension GZFlingView {
         static var clockwise:CGFloat = -1
         static var direction:GZFlingViewSwipingDirection = .Undefined
         
-        static var predictEndIndex = 0
+        static var predictEndIndex:Int? = nil
         
         static var topIndex:Int = -1
         
@@ -515,13 +517,13 @@ extension GZFlingView {
         
         static var overEnd:Bool {
             get{
-                return PrivateInstance.predictEndIndex != -1 && PrivateInstance.topIndex > PrivateInstance.predictEndIndex
+                return PrivateInstance.predictEndIndex != nil && PrivateInstance.topIndex > PrivateInstance.predictEndIndex
             }
         }
         
         static var arriveEnd:Bool{
             get{
-                return PrivateInstance.predictEndIndex != -1 && PrivateInstance.topIndex == PrivateInstance.predictEndIndex
+                return PrivateInstance.predictEndIndex != nil && PrivateInstance.topIndex == PrivateInstance.predictEndIndex
                 
             }
         }
@@ -531,6 +533,7 @@ extension GZFlingView {
             PrivateInstance.topIndex = -1
             PrivateInstance.counter = 0
             PrivateInstance.translation = CGPointZero
+            PrivateInstance.predictEndIndex = nil
         }
         
     }
