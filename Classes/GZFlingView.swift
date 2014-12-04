@@ -100,13 +100,14 @@ public class GZFlingView: UIView {
         
     }
 
-//    //FMIXME: when add subview and setting autolayout, it'll be crash on iOS7.
-//    
-//    override public func layoutSublayersOfLayer(layer: CALayer!) {
-//        
-//        self.layoutSubviews()
-//        super.layoutSublayersOfLayer(layer)
-//    }
+    //FMIXME: when add subview and setting autolayout, it'll be crash on iOS7.
+
+    override public func layoutSublayersOfLayer(layer: CALayer!) {
+        
+        self.layoutSubviews()
+        
+        super.layoutSublayersOfLayer(layer)
+    }
     
     
     public func nextCarryingView(fromCarryingView carryingView:GZFlingCarryingView) -> GZFlingCarryingView? {
