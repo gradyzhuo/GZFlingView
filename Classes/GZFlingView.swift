@@ -60,8 +60,13 @@ public class GZFlingView: UIView {
     }
     
     public var animation:GZFlingViewAnimation = GZFlingViewAnimationTinder()
+
     private var reusedNodesQueue = GZFlingNodesQueue()
     private var privateInstance = PrivateInstance()
+    
+    var countOfCarryingViews:Int{
+        return self.reusedNodesQueue.size
+    }
     
     //MARK: - Public Methods
     
@@ -109,7 +114,7 @@ public class GZFlingView: UIView {
     }
     
     
-    public func choose(direction:GZFlingViewSwipingDirection, completionHandelr:((finished:Bool) -> Void)?){
+    public func choose(direction:GZFlingViewSwipingDirection, completionHandler:((finished:Bool) -> Void)?){
         
         if self.privateInstance.overEnd(atIndex: self.reusedNodesQueue.frontNode!.flingIndex) || self.topCarryingView == nil  {
             return
@@ -136,7 +141,7 @@ public class GZFlingView: UIView {
         }
         
         self.privateInstance.direction = direction
-        self.showChoosenAnimation(direction, translation: translation!, completionHandelr: completionHandelr)
+        self.showChoosenAnimation(direction, translation: translation!, completionHandelr: completionHandler!)
         
     }
     
@@ -208,7 +213,7 @@ public class GZFlingView: UIView {
     }
 
     
-    func showChoosenAnimation(direction:GZFlingViewSwipingDirection, translation:CGPoint,completionHandelr:((finished:Bool) -> Void)?){
+    func showChoosenAnimation(direction:GZFlingViewSwipingDirection, translation:CGPoint,completionHandelr:((finished:Bool) -> Void) = {(finished:Bool)->Void in }){
         
         var currentNode = self.reusedNodesQueue.currentNode
         var nextNode = currentNode.nextNode
@@ -220,7 +225,6 @@ public class GZFlingView: UIView {
         if CGPointEqualToPoint(velocity, CGPointZero) {
             self.animation.willAppear(node: currentNode)
         }
-        
 
         
         println("weakSelf.privateInstance.counter:\(self.privateInstance.counter)")
@@ -242,9 +246,7 @@ public class GZFlingView: UIView {
             
             
             
-            if let handler = completionHandelr {
-                handler(finished: finished)
-            }
+            completionHandelr(finished: finished)
             
         })
         
@@ -301,7 +303,10 @@ extension GZFlingView : UIGestureRecognizerDelegate {
             if self.animation.shouldCancel(direction: self.privateInstance.direction, currentNode:topNode, translation: translation){
                 self.showCancelAnimation(self.direction, translation: translation)
             }else{
-                self.showChoosenAnimation(self.direction, translation: translation, completionHandelr: nil)
+                
+                self.showChoosenAnimation(self.direction, translation: translation, completionHandelr: { (finished) -> Void in
+                    
+                })
             }
             
         }
