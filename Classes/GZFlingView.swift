@@ -10,6 +10,8 @@ import UIKit
 
 public class GZFlingView: UIView {
  
+    private let kGZFlingViewReusePoolReservedSize = 2
+    
     //MARK: - Properties Declare
     
     /**
@@ -24,7 +26,7 @@ public class GZFlingView: UIView {
     /**
         (readonly)
     */
-    public var nextCarryingView : GZFlingCarryingView!{
+    public var nextCarryingView : GZFlingCarryingView?{
         get{
             return self.reusedNodesQueue.currentNode?.nextNode?.carryingView
         }
@@ -43,7 +45,15 @@ public class GZFlingView: UIView {
         return self.privateInstance.panGestureRecognizer
     }
     
-    @IBOutlet public weak var dataSource: AnyObject?
+    @IBOutlet public weak var dataSource: AnyObject?{
+        didSet{
+            
+            if dataSource != nil {
+                self.reloadData(needLayout: false)
+            }
+
+        }
+    }
     @IBOutlet public weak var delegate: AnyObject?
     
     public var isEnded:Bool{
@@ -64,9 +74,19 @@ public class GZFlingView: UIView {
     private var reusedNodesQueue = GZFlingNodesQueue()
     private var privateInstance = PrivateInstance()
     
-    var countOfCarryingViews:Int{
+    public var countOfCarryingViews:Int{
         return self.reusedNodesQueue.size
     }
+    
+    //MARK: - V2.0 改版
+    //MARK: 為了做一個Pool 去 reuse
+    private var reusedNodesPool = GZFlingNodesQueue()
+    //MARK: 現在畫面中在進行的Queue
+    private var visibleNodesQueue = GZFlingNodesQueue()
+    private var isLayouted:Bool = false
+    
+    //MARK: -
+    
     
     //MARK: - Public Methods
     
@@ -93,12 +113,14 @@ public class GZFlingView: UIView {
         super.layoutSubviews()
         
         self.animation.beginLocation = self.bounds.center
+
+//        if self.reusedNodesQueue.size == 0 {
+//            
+//            self.reloadData()
+//            
+//        }
         
-        if self.reusedNodesQueue.size == 0 {
-            
-            self.reloadData()
-            
-        }
+        self.relayout()
         
     }
 
@@ -147,64 +169,8 @@ public class GZFlingView: UIView {
     
     
     public func reloadData(){
-        
-        if self.dataSource == nil {
-            return
-        }
-        
-        self.privateInstance.reset()
-        self.reusedNodesQueue.reset()
-        
-        var numberOfCarryingViews:Int = (self.dataSource?.numberOfCarryingViewsForReusingInFlingView(self)) ?? 0
-        
-        for index in 0 ..< numberOfCarryingViews {
-            
-            if let carryingView = self.dataSource?.carryingViewForReusingAtIndexInFlingView(self, carryingViewForReusingAtIndex: index) {
-
-                self.addSubview(carryingView)
-                
-                carryingView.frame = self.bounds
-                carryingView.flingIndex = index
-                carryingView.flingView = self
-                carryingView.alpha = 0.0
-                
-                var node = GZFlingNode(carryingView: carryingView)
-                self.reusedNodesQueue += node
-                
-                self.askDatasourceShouldNeedShow(forNode: node, atIndex: index)
-                
-            }
-            
-        }
-        
-        self.askDatasourceShouldEnd(atIndex: numberOfCarryingViews)
-        self.privateInstance.counter = numberOfCarryingViews
-
-        
-        if !self.isEnded {
-            
-            self.animation.willAppear(node: self.reusedNodesQueue.frontNode!)
-            self.animation.didAppear(node: self.reusedNodesQueue.frontNode!)
-            
-            
-            self.tellDelegateWillShow(node: self.reusedNodesQueue.frontNode, atFlingIndex: self.reusedNodesQueue.frontNode!.flingIndex)
-            self.tellDelegateDidShow(node: self.reusedNodesQueue.frontNode, atFlingIndex: self.reusedNodesQueue.frontNode!.flingIndex)
-            
-        }
-        
-        
-        
-        
-        
+        self.reloadData(needLayout:true)
     }
-    
-    // MARK: - Private Methods
-    
-    func initialize(){
-        self.prepareGestures()
-        self.animation.flingView = self
-    }
-    
     
     func prepareGestures(){
         self.panGestureRecognizer.addTarget(self, action: "viewDidPan:")
@@ -216,29 +182,29 @@ public class GZFlingView: UIView {
     func showChoosenAnimation(direction:GZFlingViewSwipingDirection, translation:CGPoint,completionHandelr:((finished:Bool) -> Void) = {(finished:Bool)->Void in }){
         
         var currentNode = self.reusedNodesQueue.currentNode
-        var nextNode = currentNode.nextNode
+        var nextNode = currentNode!.nextNode
         
-        self.tellDelegateWillShow(node: currentNode.nextNode, atFlingIndex: nextNode.flingIndex)
+        self.tellDelegateWillShow(node: currentNode!.nextNode, atFlingIndex: nextNode!.flingIndex)
         
         var velocity = self.panGestureRecognizer.velocityInView(self)
         
         if CGPointEqualToPoint(velocity, CGPointZero) {
-            self.animation.willAppear(node: currentNode)
+            self.animation.willAppear(node: currentNode!)
         }
 
         
         println("weakSelf.privateInstance.counter:\(self.privateInstance.counter)")
         
-        self.animation.showChoosenAnimation(direction: direction, currentNode:currentNode, translation: translation, completionHandler: {[weak self] (finished) -> Void in
+        self.animation.showChoosenAnimation(direction: direction, currentNode:currentNode!, translation: translation, completionHandler: {[weak self] (finished) -> Void in
 
             var weakSelf = self!
             weakSelf.tellDelegateDidChoose(node: currentNode)
             
-            weakSelf.tellDelegateDidShow(node: nextNode, atFlingIndex: nextNode.flingIndex)
+            weakSelf.tellDelegateDidShow(node: nextNode, atFlingIndex: nextNode!.flingIndex)
             
             
             if CGPointEqualToPoint(velocity, CGPointZero) {
-                weakSelf.animation.didAppear(node: nextNode)
+                weakSelf.animation.didAppear(node: nextNode!)
             }
             
             weakSelf.privateInstance.counter++
@@ -275,6 +241,153 @@ public class GZFlingView: UIView {
     
     
 }
+
+
+// MARK: - Private Methods
+
+private extension GZFlingView {
+    
+    //因為Extension 指定為Private 所以裡面都不用設private
+    
+    func initialize(){
+        self.prepareGestures()
+        self.animation.flingView = self
+        //        self.reloadData()
+    }
+    
+    func relayoutIfNeeded(){
+        
+        self.relayout(true)
+        
+    }
+    
+    func relayout(){
+        
+        self.relayout(false)
+        
+    }
+    
+    func relayout(force:Bool){
+        
+        
+        
+        if force || !self.isLayouted {
+            
+            println("relayout force:\(force)")
+            
+            self.visibleNodesQueue.clear({ (node) -> Void in
+                
+                node.carryingView.removeFromSuperview()
+                
+            })
+            
+            
+            
+            
+        }
+        
+        
+        self.isLayouted = true
+        
+    }
+
+    
+    func reloadData(#needLayout:Bool){
+        
+        self.reusedNodesPool.clear()
+        
+        var minQueueSize = self.animation.expectedMinSize + kGZFlingViewReusePoolReservedSize
+        
+        for index in 0 ..< minQueueSize{
+            
+            if let carryingView = self.dataSource?.carryingViewForReusingAtIndexInFlingView(self, carryingViewForReusingAtIndex: index) {
+                
+                //prepare carryingView
+                carryingView.flingView = self
+                carryingView.alpha = 0.0
+                
+                var node = GZFlingNode(carryingView: carryingView)
+                
+                self.reusedNodesPool.push(node: node)
+
+            }
+            
+            
+        }
+        
+        
+        println("size:\(self.reusedNodesPool.size)")
+        
+//        self.reusedNodesPool.pop()
+//        self.reusedNodesPool.pop()
+//        self.reusedNodesPool.pop()
+//        self.reusedNodesPool.pop()
+//        self.reusedNodesPool.pop()
+
+        
+        if needLayout {
+            self.relayoutIfNeeded()
+        }
+        
+        println("reloadData")
+        
+        //        if self.dataSource == nil {
+        //            return
+        //        }
+        //
+        //        self.privateInstance.reset()
+        //        self.reusedNodesQueue.reset()
+        //
+        //
+        //
+        //        var numberOfCarryingViews:Int = (self.dataSource?.numberOfCarryingViewsForReusingInFlingView(self)) ?? 0
+        //
+        //        for index in 0 ..< numberOfCarryingViews {
+        //
+        //            if let carryingView = self.dataSource?.carryingViewForReusingAtIndexInFlingView(self, carryingViewForReusingAtIndex: index) {
+        //
+        //                self.addSubview(carryingView)
+        //
+        //                carryingView.frame = self.bounds
+        //                carryingView.flingIndex = index
+        //                carryingView.flingView = self
+        //                carryingView.alpha = 0.0
+        //
+        //                var node = GZFlingNode(carryingView: carryingView)
+        //                self.reusedNodesQueue += node
+        //
+        //                self.askDatasourceShouldNeedShow(forNode: node, atIndex: index)
+        //
+        //            }
+        //
+        //        }
+        //
+        //        self.askDatasourceShouldEnd(atIndex: numberOfCarryingViews)
+        //        self.privateInstance.counter = numberOfCarryingViews
+        //
+        //
+        //        if !self.isEnded {
+        //
+        //            self.animation.willAppear(node: self.reusedNodesQueue.frontNode!)
+        //            self.animation.didAppear(node: self.reusedNodesQueue.frontNode!)
+        //
+        //
+        //            self.tellDelegateWillShow(node: self.reusedNodesQueue.frontNode, atFlingIndex: self.reusedNodesQueue.frontNode!.flingIndex)
+        //            self.tellDelegateDidShow(node: self.reusedNodesQueue.frontNode, atFlingIndex: self.reusedNodesQueue.frontNode!.flingIndex)
+        //            
+        //        }
+        //        
+        
+        
+        
+        
+        
+        
+    }
+    
+    
+}
+
 
 //MARK: - Gesture Support
 extension GZFlingView : UIGestureRecognizerDelegate {
@@ -570,7 +683,7 @@ private struct PrivateInstance {
 
 @objc public protocol GZFlingViewDatasource : NSObjectProtocol{
     func numberOfCarryingViewsForReusingInFlingView(flingView:GZFlingView) -> Int
-    func carryingViewForReusingAtIndexInFlingView(flingView:GZFlingView, carryingViewForReusingAtIndex reuseIndex:Int) -> GZFlingCarryingView
+    func carryingViewForReusingAtIndexInFlingView(flingView:GZFlingView, carryingViewForReusingAtIndex reuseIndex:Int) -> GZFlingCarryingView?
     
     optional func flingViewShouldEnd(flingView:GZFlingView, atFlingIndex index:Int)->Bool
     optional func flingViewPrepareCarryingView(flingView:GZFlingView, preparingCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
