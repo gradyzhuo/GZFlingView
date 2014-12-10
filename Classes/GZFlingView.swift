@@ -195,9 +195,7 @@ public class GZFlingView: UIView {
 
             currentNode.carryingView.removeFromSuperview()
             
-            if let weakSelf = self {
-                
-                
+            if let weakSelf:GZFlingView = self {
                 
                 weakSelf.tellDelegateDidChoose(node: currentNode)
                 weakSelf.tellDelegateDidShow(node: nextNode)
@@ -207,10 +205,15 @@ public class GZFlingView: UIView {
                 }
                 
                 if !weakSelf.isEnded {
-                     weakSelf.askDatasourceToContinue()
+                    
+                    for i in  0 ..< (weakSelf.animation.expectedMinSize - weakSelf.visibleNodesQueue.size) {
+                        weakSelf.askDatasourceToContinue()
+                    }
+                    
+                    
                 }
                 
-               
+                
                 
             }
             
@@ -616,29 +619,12 @@ extension GZFlingView {
     //回傳是否要Continue
     func askDatasourceToContinue()->GZFlingNode! {
         
-        
         var reusedNode = self.askDatasourceShouldEnd()//self.reusedNodesPool.pop()
         if reusedNode == nil {
             return nil
         }
         
         var carryingView = reusedNode.carryingView
-        
-//        var carryingView = reusedNode.carryingView
-//        
-//        if let rearNode = self.visibleNodesQueue.rearNode {
-//            carryingView.flingIndex = rearNode.flingIndex + 1
-//        }
-//        
-//        if self.askDatasourceShouldEnd(atIndex:carryingView.flingIndex){
-//            
-//            println("self.askDatasourceShouldEnd 1")
-//            
-//            self.reusedNodesPool.push(node: reusedNode)
-//            
-//            return false
-//
-//        }
         
         if let prepareMethod = self.dataSource?.flingViewPrepareCarryingView {
             
