@@ -197,9 +197,7 @@ public class GZFlingView: UIView {
             
             if let weakSelf = self {
                 
-                if weakSelf.isEnded {
-                    return
-                }
+                
                 
                 weakSelf.tellDelegateDidChoose(node: currentNode)
                 weakSelf.tellDelegateDidShow(node: nextNode)
@@ -208,7 +206,11 @@ public class GZFlingView: UIView {
                     weakSelf.animation.didAppear(node: nextNode!)
                 }
                 
-                weakSelf.askDatasourceToContinue()
+                if !weakSelf.isEnded {
+                     weakSelf.askDatasourceToContinue()
+                }
+                
+               
                 
             }
             
