@@ -711,7 +711,6 @@ private struct PrivateInstance {
 //MARK:- Datasource Methods Declare
 
 @objc public protocol GZFlingViewDatasource{
-    func numberOfCarryingViewsForReusingInFlingView(flingView:GZFlingView) -> Int
     func carryingViewForReusingAtIndexInFlingView(flingView:GZFlingView, carryingViewForReusingAtIndex reuseIndex:Int) -> GZFlingCarryingView
     
     optional func flingViewShouldEnd(flingView:GZFlingView, atFlingIndex index:Int)->Bool
