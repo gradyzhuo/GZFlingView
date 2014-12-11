@@ -158,7 +158,7 @@ public class GZFlingView: UIView {
     
     
     public func reloadData(){
-        self.reloadData(needLayout:true)
+        self.reloadData(needLayout: true)
     }
     
     func prepareGestures(){
@@ -284,6 +284,8 @@ private extension GZFlingView {
             })
             
             
+            
+            //應該要改成，Animation 要 n ，但FlingView保留+m, 避免畫面不順，但m在預設會是空的
             //重新安排及AddSubview
             for index in 0 ..< self.animation.expectedMinSize{
                 
@@ -330,71 +332,16 @@ private extension GZFlingView {
                 var node = GZFlingNode(carryingView: carryingView)
                 
                 self.reusedNodesPool.push(node: node)
-
+                
             }
             
             
         }
-        
-        
-//        println("size:\(self.reusedNodesPool.size)")
 
         
         if needLayout {
             self.relayoutIfNeeded()
         }
-        
-        
-        
-        
-//        println("reloadData")
-        
-        //        if self.dataSource == nil {
-        //            return
-        //        }
-        //
-        //        self.privateInstance.reset()
-        //        self.reusedNodesQueue.reset()
-        //
-        //
-        //
-        //        var numberOfCarryingViews:Int = (self.dataSource?.numberOfCarryingViewsForReusingInFlingView(self)) ?? 0
-        //
-        //        for index in 0 ..< numberOfCarryingViews {
-        //
-        //            if let carryingView = self.dataSource?.carryingViewForReusingAtIndexInFlingView(self, carryingViewForReusingAtIndex: index) {
-        //
-        //                self.addSubview(carryingView)
-        //
-        //                carryingView.frame = self.bounds
-        //                carryingView.flingIndex = index
-        //                carryingView.flingView = self
-        //                carryingView.alpha = 0.0
-        //
-        //                var node = GZFlingNode(carryingView: carryingView)
-        //                self.reusedNodesQueue += node
-        //
-        //                self.askDatasourceShouldNeedShow(forNode: node, atIndex: index)
-        //
-        //            }
-        //
-        //        }
-        //
-        //        self.askDatasourceShouldEnd(atIndex: numberOfCarryingViews)
-        //        self.privateInstance.counter = numberOfCarryingViews
-        //
-        //
-        //        if !self.isEnded {
-        //
-        //            self.animation.willAppear(node: self.reusedNodesQueue.frontNode!)
-        //            self.animation.didAppear(node: self.reusedNodesQueue.frontNode!)
-        //
-        //
-        //            self.tellDelegateWillShow(node: self.reusedNodesQueue.frontNode, atFlingIndex: self.reusedNodesQueue.frontNode!.flingIndex)
-        //            self.tellDelegateDidShow(node: self.reusedNodesQueue.frontNode, atFlingIndex: self.reusedNodesQueue.frontNode!.flingIndex)
-        //            
-        //        }
-        //        
         
     }
     
