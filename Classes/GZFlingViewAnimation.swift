@@ -1,18 +1,19 @@
 //
 //  GZFlingViewAnimation.swift
-//  Flingy
+//  GZFlingViewDemo
 //
-//  Created by Grady Zhuo on 2014/9/25.
-//  Copyright (c) 2014年 Grady Zhuo. All rights reserved.
+//  Created by Grady Zhuo on 12/11/14.
+//  Copyright (c) 2014 Grady Zhuo. All rights reserved.
 //
 
-import Foundation
-
+import UIKit
 
 enum GZFlingViewAnimationState:Int{
     case Init = 0
 }
 
+
+//MARK: - Animation
 
 let kGZFlingViewAnimationDuration:NSTimeInterval = 0.2
 
@@ -20,38 +21,39 @@ public class GZFlingViewAnimation {
     
     var flingView:GZFlingView!
     var beginLocation:CGPoint = CGPoint()
-    var nodesQueue:GZFlingNodesQueue!
     
     init(){
         
     }
     
+    var expectedMinSize:Int {
+        return 0
+    }
     
-    func gesturePanning(#gesture:UIPanGestureRecognizer, translation:CGPoint){}
-    func willBeginGesture(#gesture:UIPanGestureRecognizer){}
-    func didEndGesture(#gesture:UIPanGestureRecognizer){}
+    func gesturePanning(#gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!, translation:CGPoint){}
+    func willBeginGesture(#gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!){}
+    func didEndGesture(#gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!){}
     
     
-    func prepare(#carryingView:GZFlingCarryingView, reuseIndex:Int){
+    func prepare(#node:GZFlingNode){
         //pass
     }
     
-    func willAppear(#carryingView:GZFlingCarryingView!){
+    func willAppear(#node:GZFlingNode!){
         //pass
     }
     
-    func didAppear(#carryingView:GZFlingCarryingView!){
+    func didAppear(#node:GZFlingNode!){
         //pass
     }
-
     
-    func shouldCancel(#direction:GZFlingViewSwipingDirection, translation:CGPoint)->Bool{return true}
-    func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
     
-    func showCancelAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint,completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    func shouldCancel(#direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint)->Bool{return true}
+    func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    
+    func showCancelAnimation(#direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint,completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
     
 }
-
 
 
 public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
@@ -65,14 +67,18 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     lazy var initalTranslationY : CGFloat = {
         var scale = self.targetScaleValue-self.initalScaleValue
         return (self.flingView.bounds.height * scale )
-    }()
+        }()
     
     lazy var distanceY:CGFloat = {
         var scale = self.secondInitalScaleValue-self.initalScaleValue
         return (self.flingView.bounds.height * scale )
-    }()
+        }()
     
     var privateInstance = PrivateInstance()
+    
+    override var expectedMinSize:Int {
+        return 4
+    }
     
     lazy var initialTransforms : CGAffineTransform = {
         
@@ -80,7 +86,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
         return CGAffineTransformScale(transforms, self.initalScaleValue, self.initalScaleValue)
         
-    }()
+        }()
     
     
     lazy var secondInitalTranslationY : CGFloat = {
@@ -92,7 +98,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         var scale = self.targetScaleValue-self.secondInitalScaleValue
         return (self.flingView.bounds.height * scale )
         }()
-
+    
     lazy var secondInitialTransforms : CGAffineTransform = {
         
         var transforms = CGAffineTransformMakeTranslation(0, self.secondInitalTranslationY)
@@ -104,30 +110,43 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     lazy var maxWidthForFling:CGFloat = {
         return (UIScreen.mainScreen().bounds.width / 2) * (2/3)
-    }()
+        }()
     
-    override func prepare(#carryingView: GZFlingCarryingView, reuseIndex: Int) {
+    override func prepare(#node:GZFlingNode) {
         
+        var carryingView = node.carryingView
         
         carryingView.layer.position = self.beginLocation
         carryingView.transform = self.initialTransforms
         
+        self.radomClosewise = self.getNewRandomClosewise()
+        
     }
     
-    override func willAppear(#carryingView:GZFlingCarryingView!){
+    override func willAppear(#node:GZFlingNode!){
         
         UIView.animateWithDuration(0.2, delay: 0.06, usingSpringWithDamping: 0.5, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut , animations: {[weak self] () -> Void in
             
-            
             if let weakSelf = self {
-                carryingView.transform = CGAffineTransformIdentity
                 
-                var nextCarryingView:GZFlingCarryingView! = weakSelf.flingView.nextCarryingView(fromCarryingView: carryingView)
+                if let topNode = node {
+                    
+                    topNode.carryingView.transform = CGAffineTransformIdentity
+                    
+                    if let secondNode = topNode.nextNode {
+                        
+                        secondNode.carryingView.transform = weakSelf.secondInitialTransforms
+                        
+                        
+                        
+                    }
+                    
+                    
+                    
+                }
                 
-                nextCarryingView.transform = weakSelf.secondInitialTransforms
+                
             }
-            
-            
             
             
             }, completion: {[weak self] (finished:Bool)->Void in
@@ -137,23 +156,19 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
                 }
                 
         })
-
-        
-    }
-    
-    
-    override func didAppear(#carryingView:GZFlingCarryingView!){
         
         
     }
     
-    override func willBeginGesture(#gesture: UIPanGestureRecognizer) {
+    override func willBeginGesture(#gesture: UIPanGestureRecognizer, currentNode:GZFlingNode?) {
         self.radomClosewise = self.getNewRandomClosewise()
     }
     
-    override func gesturePanning(#gesture: UIPanGestureRecognizer, translation: CGPoint) {
+    override func gesturePanning(#gesture: UIPanGestureRecognizer, currentNode:GZFlingNode?, translation: CGPoint) {
         
-        if let carryingView = self.flingView.topCarryingView{
+        if let topNode = currentNode {
+            
+            var carryingView = topNode.carryingView
             
             var percent = fabs(translation.x / self.maxWidthForFling)
             percent = min(percent, 1.0)
@@ -161,120 +176,122 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
             carryingView.layer.position = self.beginLocation.pointByOffsetting(translation.x, dy: translation.y)
             carryingView.transform = CGAffineTransformMakeRotation(self.radomClosewise*fabs(translation.x)/100*0.1)
             
-            //最二層 到 最上層
+            if let secondNode = topNode.nextNode {
+                
+                //最二層 到 最上層
+                var nextCarryingView:GZFlingCarryingView = secondNode.carryingView
+                
+                //scaleAdder:計算要在初始化增加的scale的量
+                var scaleAdder = (self.targetScaleValue - self.secondInitalScaleValue) * percent
+                var scale = self.secondInitalScaleValue+scaleAdder
+                
+                var transformSubractor = self.secondDistanceY*percent
+                
+                var transform = CGAffineTransformMakeTranslation(0, max(self.secondInitalTranslationY-transformSubractor, 0))
+                transform = CGAffineTransformScale(transform, scale, scale)
+                nextCarryingView.transform = transform
+                
+                
+                
+            }
             
-            var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: carryingView)
             
-            //scaleAdder:計算要在初始化增加的scale的量
-            var scaleAdder = (self.targetScaleValue - self.secondInitalScaleValue) * percent
-            var scale = self.secondInitalScaleValue+scaleAdder
+            if let lastNode = topNode.nextNode?.nextNode {
+                
+                //最底層 到 第二層
+                
+                var nextNextCarryingView:GZFlingCarryingView! = lastNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
+                
+                var nextScaleAdder = (self.secondInitalScaleValue-self.initalScaleValue) * percent
+                var nextScale = self.initalScaleValue+nextScaleAdder
+                
+                var nextTransformSubractor = self.distanceY*percent
+                
+                var nextTransform = CGAffineTransformMakeTranslation(0, max(self.initalTranslationY-nextTransformSubractor, 0))
+                nextTransform = CGAffineTransformScale(nextTransform, nextScale, nextScale)
+                nextNextCarryingView.transform = nextTransform
+                
+                
+            }
             
-            var transformSubractor = self.secondDistanceY*percent
-            
-            var transform = CGAffineTransformMakeTranslation(0, max(self.secondInitalTranslationY-transformSubractor, 0))
-            transform = CGAffineTransformScale(transform, scale, scale)
-            nextCarryingView.transform = transform
             
             
-            //最底層 到 第二層
-            
-            var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
-            
-            var nextScaleAdder = (self.secondInitalScaleValue-self.initalScaleValue) * percent
-            var nextScale = self.initalScaleValue+nextScaleAdder
-            
-            var nextTransformSubractor = self.distanceY*percent
-            
-            var nextTransform = CGAffineTransformMakeTranslation(0, max(self.initalTranslationY-nextTransformSubractor, 0))
-            nextTransform = CGAffineTransformScale(nextTransform, nextScale, nextScale)
-            nextNextCarryingView.transform = nextTransform
             
             
             self.privateInstance.previousTranslation = translation
+        }
+        
+        if let carryingView = self.flingView.topCarryingView{
+            
+            
             
         }
         
-//        var carryingView = self.flingView.topCarryingView
+        //        var carryingView = self.flingView.topCarryingView
         
         
     }
     
-    override func didEndGesture(#gesture: UIPanGestureRecognizer) {
-        
-    }
     
-    
-    override func showCancelAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
+    override func showCancelAnimation(#direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
         
-        if let currentCarryingView = self.flingView.topCarryingView {
-//            var currentCarryingView = self.flingView.topCarryingView
-            var nextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
-            var nextNextCarryingView:GZFlingCarryingView! = self.nodesQueue.currentNode.nextNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: nextCarryingView)
+        
+        if let topNode = currentNode {
             
             UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 15, options:  UIViewAnimationOptions.CurveEaseInOut | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations: {[weak self] () -> Void in
                 
-                if let weakSefl = self {
-                    
-                    currentCarryingView.layer.position = weakSefl.beginLocation
-                    currentCarryingView.transform = CGAffineTransformIdentity
-                    
-                    nextCarryingView.transform = weakSefl.secondInitialTransforms
-                    
-                    nextNextCarryingView.transform = weakSefl.initialTransforms
-                    
+                topNode.carryingView.layer.position = self!.beginLocation
+                topNode.carryingView.transform = CGAffineTransformIdentity
+                
+                if let secondNode = topNode.nextNode {
+                    secondNode.carryingView.transform = self!.secondInitialTransforms
+                }
+                
+                if let lastNode = topNode.nextNode?.nextNode {
+                    lastNode.carryingView.transform = self!.initialTransforms
                 }
                 
                 
                 
-            }, completion: {[weak self] (finished:Bool)->Void in
+                }, completion: {[weak self] (finished:Bool)->Void in
+                    
+                    //                self!.privateInstance.previousTranslation = CGPoint()
                     
                     completionHandler(finished: finished)
                     
             })
-
+            
+        }else{
+            completionHandler(finished: true)
         }
+        
         
     }
     
-    override func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
-
-        if let currentCarryingView = self.flingView.topCarryingView {
-//            var currentCarryingView = self.flingView.topCarryingView
-            var nextCarryingView = self.nodesQueue.currentNode.nextNode.carryingView//self.flingView.nextCarryingView(fromCarryingView: currentCarryingView)
-            
-            //        var animationGroup = CAAnimationGroup()
-            //
-            //        var transformAnimation = CABasicAnimation(keyPath: "transform")
-            //        transformAnimation.fromValue = CGAffineTransformMakeRotation(self.radomClosewise * 0.25)
-            //
-            //
-            //        animationGroup.animations = [transformAnimation]
-            //
-            //        currentCarryingView.layer.addAnimation(animationGroup, forKey: "transform")
-            
+    override func showChoosenAnimation(#direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint, completionHandler:((finished:Bool)->Void)){
+        
+        if let topNode = currentNode {
             
             UIView.animateWithDuration(kGZFlingViewAnimationDuration, delay: 0, options: UIViewAnimationOptions.CurveEaseIn | UIViewAnimationOptions.AllowUserInteraction | UIViewAnimationOptions.BeginFromCurrentState , animations:{[weak self] ()-> Void in
                 
-                if let weakSelf = self {
-                    
-                    currentCarryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
-                    currentCarryingView.transform = CGAffineTransformMakeRotation(weakSelf.radomClosewise * 0.25)
-                    currentCarryingView.alpha = 0
-                    
-                }
+                topNode.carryingView.layer.position.offset(dx: translation.x*2, dy: translation.y*2)
+                topNode.carryingView.transform = CGAffineTransformMakeRotation(self!.radomClosewise * 0.25)
+                topNode.carryingView.alpha = 0
                 
                 
                 }) {[weak self](finished:Bool)->Void in
                     
-                    completionHandler(finished: finished)
                     
+                    
+                    completionHandler(finished: finished)
             }
-
+            
+        }else{
+            completionHandler(finished: true)
         }
         
-        
     }
-
+    
     
     func getNewRandomClosewise() -> CGFloat{
         var random = arc4random()%10
@@ -282,7 +299,7 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         var radomClosewise = -1
         
         switch random {
-
+            
         case 0,1,3:
             radomClosewise = 1
             
@@ -294,9 +311,9 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
         
     }
     
-
     
-    override func shouldCancel(#direction: GZFlingViewSwipingDirection, translation: CGPoint) -> Bool {
+    
+    override func shouldCancel(#direction: GZFlingViewSwipingDirection, currentNode:GZFlingNode?,translation: CGPoint) -> Bool {
         
         //self.flingView.frame.width/6*2
         return !(fabs(translation.x) > self.maxWidthForFling )
@@ -304,9 +321,9 @@ public class GZFlingViewAnimationTinder:GZFlingViewAnimation{
     
     
     struct PrivateInstance {
-    
+        
         var previousTranslation = CGPoint()
-    
+        
     }
     
 }

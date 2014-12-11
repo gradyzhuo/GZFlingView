@@ -1,15 +1,12 @@
 //
 //  Enums.swift
-//  Flingy
+//  GZFlingViewDemo
 //
-//  Created by Grady Zhuo on 2014/9/21.
-//  Copyright (c) 2014年 Grady Zhuo. All rights reserved.
+//  Created by Grady Zhuo on 12/11/14.
+//  Copyright (c) 2014 Grady Zhuo. All rights reserved.
 //
 
-import UIKit
-
-//public typealias GZFlingViewSwipingDirection = GZFlingView.SwipingDirection
-//public typealias GZFlingViewAnimationType = GZFlingView.AnimationType
+import Foundation
 
 public enum GZFlingViewSwipingDirection:Int{
     
