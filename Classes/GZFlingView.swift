@@ -20,7 +20,7 @@ public class GZFlingView: UIView {
     */
     public  var topCarryingView : GZFlingCarryingView!{
         get{
-            return self.privateInstance.visibleNodesQueue.frontNode?.carryingView//self.reusedNodesQueue.frontNode?.carryingView //self.reusedNodesQueue.currentNode?.carryingView
+            return self.privateInstance.visibleNodesQueue.frontNode?.carryingView
         }
     }
     
