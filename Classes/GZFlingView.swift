@@ -54,7 +54,7 @@ public class GZFlingView: UIView {
         return self.privateInstance.panGestureRecognizer
     }
 
-    @IBOutlet public var dataSource: GZFlingViewDatasource!{
+    @IBOutlet public var dataSource: AnyObject!{
         didSet{
             
             if dataSource != nil {
@@ -63,7 +63,7 @@ public class GZFlingView: UIView {
 
         }
     }
-    @IBOutlet public var delegate: GZFlingViewDelegate!
+    @IBOutlet public var delegate: AnyObject!
     
     public var isEnded:Bool{
         get{
@@ -133,6 +133,8 @@ public class GZFlingView: UIView {
             return
         }
         
+        self.panGestureRecognizer.enabled = false
+        
         var translation:CGPoint?
         switch direction {
             
@@ -189,7 +191,7 @@ public class GZFlingView: UIView {
 
         var velocity = self.panGestureRecognizer.translationInView(self)
         
-        if CGPointEqualToPoint(velocity, CGPointZero) {
+        if !self.panGestureRecognizer.enabled {
             self.animation.willAppear(node: nextNode)
         }
 
@@ -204,7 +206,7 @@ public class GZFlingView: UIView {
     
                 if !weakSelf.isEnded {
                     
-                    if CGPointEqualToPoint(velocity, CGPointZero) {
+                    if !weakSelf.panGestureRecognizer.enabled {
                         weakSelf.animation.didAppear(node: nextNode!)
                     }
                     
@@ -212,10 +214,9 @@ public class GZFlingView: UIView {
                         weakSelf.askDatasourceToContinue()
                     }
                     
-                    
                 }
                 
-                
+                weakSelf.panGestureRecognizer.enabled = true
                 
             }
             
@@ -419,7 +420,7 @@ extension GZFlingView {
     
     func tellDelegateWillCancelChoosing(#node:GZFlingNode!){
         
-        if let delegateMethod = self.delegate?.flingViewWillCancelChoose {
+        if let delegateMethod = self.delegate?.flingViewWillCancelChooseCarryingView {
             
             delegateMethod(self, willCancelChooseCarryingView: node.carryingView, atFlingIndex: node.flingIndex)
             
@@ -611,7 +612,7 @@ private struct PrivateInstance {
     optional func flingViewWillChooseCarryingView(flingView:GZFlingView, willChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     optional func flingViewDidChooseCarryingView(flingView:GZFlingView, didChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     
-    optional func flingViewWillCancelChoose(flingView:GZFlingView, willCancelChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
+    optional func flingViewWillCancelChooseCarryingView(flingView:GZFlingView, willCancelChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     optional func flingViewDidCancelChooseCarryingView(flingView:GZFlingView, didCancelChooseCarryingView carryingView:GZFlingCarryingView, atFlingIndex index:Int)->Void
     
     
