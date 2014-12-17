@@ -58,6 +58,7 @@ public class GZFlingCarryingView: UIView {
     
     func initialize(){
         self.layer.shouldRasterize = true
+        self.layer.rasterizationScale = UIScreen.mainScreen().scale
     }
     
     public func prepareForReuse(){
