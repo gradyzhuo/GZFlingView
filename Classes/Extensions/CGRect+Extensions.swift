@@ -17,7 +17,7 @@ extension CGRect {
     }
     
     func rectByOffsetDelta(delta : CGPoint) -> CGRect {
-        return self.rectByOffsetting(dx: delta.x, dy: delta.y)
+        return self.offsetBy(dx: delta.x, dy: delta.y)
     }
     
 }

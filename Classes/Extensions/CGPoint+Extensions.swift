@@ -16,7 +16,7 @@ public extension CGPoint{
         }
     }
     
-    mutating func offset(#dx:CGFloat, dy:CGFloat) -> Void {
+    mutating func offset(dx dx:CGFloat, dy:CGFloat) -> Void {
         self.x += dx
         self.y += dy
     }

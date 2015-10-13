@@ -69,7 +69,7 @@ class GZFlingNodesQueue{
         
         self.init()
         
-        var copy = frontNode.copy() as GZFlingNode
+        var copy = frontNode.copy() as! GZFlingNode
         
         self.push(node: frontNode)
         
@@ -77,13 +77,13 @@ class GZFlingNodesQueue{
     }
     
     
-    func push(#node:GZFlingNode!){
+    func push(node node:GZFlingNode!){
         
         if node == nil {
             return
         }
         
-        var copy = node.copy() as GZFlingNode
+        var copy = node.copy() as! GZFlingNode
         
         if let rearNode = self.privateQueueInstance.rearNode {
             rearNode.privateInstance.nextNode = copy
@@ -107,9 +107,9 @@ class GZFlingNodesQueue{
         assert(self.privateSize > 0, "Please check your queue size, it's cannot be 0 to pop.")
         
         //取frontNode出來做為willPopNode
-        var willPopNode = self.frontNode
+        let willPopNode = self.frontNode
         //先取frontNode的nextNode出來
-        var nextFrontNode = willPopNode?.nextNode
+        let nextFrontNode = willPopNode?.nextNode
         
         //因為要pop了，所以將要pop的Node的next設為nil
         willPopNode?.setNextNode(nil)
@@ -134,7 +134,7 @@ class GZFlingNodesQueue{
     
     func next() -> GZFlingNode {
         
-        var nextNode:GZFlingNode = (self.currentNode?.nextNode)!
+        let nextNode:GZFlingNode = (self.currentNode?.nextNode)!
         self.privateQueueInstance.currentNode = nextNode
         
         self.privateQueueInstance.rearNode = self.rearNode?.nextNode
@@ -170,7 +170,7 @@ class GZFlingNodesQueue{
         var node:GZFlingNode! = self.frontNode
         
         for idx in 0 ..< self.privateQueueInstance.size {
-            var poppedNode = self.pop()
+            let poppedNode = self.pop()
             
             //因為有Default值，所以可以不用檢查
             enumerateHandler(node:poppedNode)
@@ -208,7 +208,7 @@ class GZFlingNodesQueue{
         
         self.enumerateObjectsUsingBlock { (node, idx, isEnded) -> Void in
             
-            println("[\(idx)]node:\(node), next:\(node.nextNode)")
+            print("[\(idx)]node:\(node), next:\(node.nextNode)")
             
         }
         
@@ -331,11 +331,11 @@ class GZFlingNode : NSObject, NSCopying {
 }
 
 
-extension GZFlingNodesQueue : Printable {
+extension GZFlingNodesQueue : CustomStringConvertible {
     var description:String{
         get{
             var rearNode = self.rearNode
-            var printNode = self.frontNode
+            let printNode = self.frontNode
             
             var descriptionString = ""
             

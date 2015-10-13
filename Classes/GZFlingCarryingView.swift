@@ -33,8 +33,8 @@ public class GZFlingCarryingView: UIView {
     }
     
     
-    public init(customView:UIView!) {
-        super.init()
+    public convenience init(customView:UIView!) {
+        self.init(frame: .zero)
         
         self.customView = customView
         self.addSubview(customView)
@@ -42,19 +42,6 @@ public class GZFlingCarryingView: UIView {
         self.initialize()
     }
     
-    
-    public override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        self.initialize()
-    }
-    
-    public required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        
-        self.initialize()
-        
-    }
     
     func initialize(){
         self.layer.shouldRasterize = true
@@ -71,7 +58,7 @@ public class GZFlingCarryingView: UIView {
     }
     
     override public func drawRect(rect: CGRect) {
-        var context = UIGraphicsGetCurrentContext()
+        let context = UIGraphicsGetCurrentContext()
         CGContextSetAllowsAntialiasing(context, true)
         CGContextSetShouldAntialias(context, true)
     }
