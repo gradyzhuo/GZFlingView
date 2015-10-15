@@ -14,6 +14,7 @@
 		790B2B4C1BCD3C47007D292F /* GZFlingNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 790B2B451BCD3C47007D292F /* GZFlingNode.swift */; };
 		790B2B4D1BCD3C47007D292F /* GZFlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 790B2B461BCD3C47007D292F /* GZFlingView.swift */; };
 		790B2B4E1BCD3C47007D292F /* GZFlingViewAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 790B2B471BCD3C47007D292F /* GZFlingViewAnimation.swift */; };
+		790B2B511BCD4EF9007D292F /* GZFlingViewAnimationTinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 790B2B501BCD4EF9007D292F /* GZFlingViewAnimationTinder.swift */; };
 		7931643B1BCD1D4F00C298FF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7931643A1BCD1D4F00C298FF /* AppDelegate.swift */; };
 		7931643D1BCD1D4F00C298FF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7931643C1BCD1D4F00C298FF /* ViewController.swift */; };
 		793164401BCD1D4F00C298FF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7931643E1BCD1D4F00C298FF /* Main.storyboard */; };
@@ -88,6 +89,7 @@
 		790B2B451BCD3C47007D292F /* GZFlingNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GZFlingNode.swift; path = ../../Classes/GZFlingNode.swift; sourceTree = "<group>"; };
 		790B2B461BCD3C47007D292F /* GZFlingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GZFlingView.swift; path = ../../Classes/GZFlingView.swift; sourceTree = "<group>"; };
 		790B2B471BCD3C47007D292F /* GZFlingViewAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GZFlingViewAnimation.swift; path = ../../Classes/GZFlingViewAnimation.swift; sourceTree = "<group>"; };
+		790B2B501BCD4EF9007D292F /* GZFlingViewAnimationTinder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GZFlingViewAnimationTinder.swift; sourceTree = "<group>"; };
 		793164371BCD1D4F00C298FF /* GZFlingViewDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GZFlingViewDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7931643A1BCD1D4F00C298FF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7931643C1BCD1D4F00C298FF /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -161,6 +163,15 @@
 			path = ../../Classes/Extensions;
 			sourceTree = "<group>";
 		};
+		790B2B4F1BCD4EE6007D292F /* Animation */ = {
+			isa = PBXGroup;
+			children = (
+				790B2B471BCD3C47007D292F /* GZFlingViewAnimation.swift */,
+				790B2B501BCD4EF9007D292F /* GZFlingViewAnimationTinder.swift */,
+			);
+			name = Animation;
+			sourceTree = "<group>";
+		};
 		7931642E1BCD1D4F00C298FF = {
 			isa = PBXGroup;
 			children = (
@@ -219,11 +230,11 @@
 		7931647E1BCD1DC900C298FF /* GZFlingView */ = {
 			isa = PBXGroup;
 			children = (
+				790B2B4F1BCD4EE6007D292F /* Animation */,
 				790B2B401BCD3C47007D292F /* Extensions */,
 				790B2B441BCD3C47007D292F /* GZFlingCarryingView.swift */,
 				790B2B451BCD3C47007D292F /* GZFlingNode.swift */,
 				790B2B461BCD3C47007D292F /* GZFlingView.swift */,
-				790B2B471BCD3C47007D292F /* GZFlingViewAnimation.swift */,
 				7931647F1BCD1DC900C298FF /* GZFlingView.h */,
 				793164811BCD1DC900C298FF /* Info.plist */,
 			);
@@ -475,6 +486,7 @@
 			files = (
 				790B2B4E1BCD3C47007D292F /* GZFlingViewAnimation.swift in Sources */,
 				790B2B481BCD3C47007D292F /* CGPoint+Extensions.swift in Sources */,
+				790B2B511BCD4EF9007D292F /* GZFlingViewAnimationTinder.swift in Sources */,
 				790B2B4A1BCD3C47007D292F /* Enums.swift in Sources */,
 				790B2B4D1BCD3C47007D292F /* GZFlingView.swift in Sources */,
 				790B2B4C1BCD3C47007D292F /* GZFlingNode.swift in Sources */,

@@ -69,8 +69,6 @@ class GZFlingNodesQueue{
         
         self.init()
         
-        var copy = frontNode.copy() as! GZFlingNode
-        
         self.push(node: frontNode)
         
         self.privateQueueInstance.size = 1
@@ -83,7 +81,7 @@ class GZFlingNodesQueue{
             return
         }
         
-        var copy = node.copy() as! GZFlingNode
+        let copy = node.copy() as! GZFlingNode
         
         if let rearNode = self.privateQueueInstance.rearNode {
             rearNode.privateInstance.nextNode = copy
@@ -104,7 +102,10 @@ class GZFlingNodesQueue{
     
     func pop() -> GZFlingNode!{
         
-        assert(self.privateSize > 0, "Please check your queue size, it's cannot be 0 to pop.")
+        guard self.privateSize > 0 else{
+            print("Please check your queue size, it's cannot be 0 to pop.")
+            return nil
+        }
         
         //取frontNode出來做為willPopNode
         let willPopNode = self.frontNode
@@ -166,10 +167,8 @@ class GZFlingNodesQueue{
     func clear(enumerateHandler:((node:GZFlingNode)->Void) = {(node:GZFlingNode)->Void in return}){
         
         self.rearNode?.privateInstance.nextNode = nil
-        
-        var node:GZFlingNode! = self.frontNode
-        
-        for idx in 0 ..< self.privateQueueInstance.size {
+
+        for _ in 0 ..< self.privateQueueInstance.size {
             let poppedNode = self.pop()
             
             //因為有Default值，所以可以不用檢查
@@ -266,8 +265,8 @@ extension GZFlingNodesQueue {
     
 }
 
-//MARK: -
-class GZFlingNode : NSObject, NSCopying {
+//MARK: - 
+public class GZFlingNode : NSObject, NSCopying {
     
     // MARK: Properties
     
@@ -300,7 +299,7 @@ class GZFlingNode : NSObject, NSCopying {
         self.privateInstance = PrivateInstance(carryingView: carryingView)
     }
     
-    func copyWithZone(zone: NSZone) -> AnyObject {
+    public func copyWithZone(zone: NSZone) -> AnyObject {
         
         return GZFlingNode(carryingView: self.carryingView)
         
@@ -334,7 +333,6 @@ class GZFlingNode : NSObject, NSCopying {
 extension GZFlingNodesQueue : CustomStringConvertible {
     var description:String{
         get{
-            var rearNode = self.rearNode
             let printNode = self.frontNode
             
             var descriptionString = ""
