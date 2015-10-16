@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9052" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9040"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
@@ -17,24 +18,65 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UPU-gz-0AO" customClass="GZFlingView" customModule="GZFlingView">
+                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UPU-gz-0AO" customClass="GZFlingView" customModule="GZFlingView">
                                 <rect key="frame" x="50" y="30" width="500" height="462"/>
                                 <animations/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <variation key="widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="50" y="30" width="300" height="462"/>
+                                </variation>
                                 <connections>
                                     <outlet property="dataSource" destination="BYZ-38-t0r" id="NMg-Oe-rKk"/>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="liw-cc-nKn"/>
                                 </connections>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yce-rt-x2J">
+                                <rect key="frame" x="-23" y="-15" width="46" height="30"/>
+                                <animations/>
+                                <color key="backgroundColor" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="Reset">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <variation key="widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="50" y="506" width="300" height="51"/>
+                                </variation>
+                                <connections>
+                                    <action selector="reset" destination="BYZ-38-t0r" eventType="touchUpInside" id="nxg-If-UWb"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="UPU-gz-0AO" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="10" id="Clx-yg-Tku"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="UPU-gz-0AO" secondAttribute="bottom" constant="108" id="Lt4-tq-iiR"/>
+                            <constraint firstAttribute="trailing" secondItem="Yce-rt-x2J" secondAttribute="trailing" constant="50" id="KR2-sh-YQv"/>
+                            <constraint firstItem="Yce-rt-x2J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="50" id="Nc7-GH-maQ"/>
                             <constraint firstAttribute="trailingMargin" secondItem="UPU-gz-0AO" secondAttribute="trailing" constant="30" id="Ocd-AJ-qCJ"/>
+                            <constraint firstItem="Yce-rt-x2J" firstAttribute="top" secondItem="UPU-gz-0AO" secondAttribute="bottom" constant="14" id="Ueu-cP-ohv"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Yce-rt-x2J" secondAttribute="bottom" constant="43" id="XCs-BE-BxF"/>
                             <constraint firstItem="UPU-gz-0AO" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="30" id="XKG-ok-J4c"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="Yce-rt-x2J"/>
+                            </mask>
+                            <mask key="constraints">
+                                <exclude reference="KR2-sh-YQv"/>
+                                <exclude reference="Nc7-GH-maQ"/>
+                                <exclude reference="Ueu-cP-ohv"/>
+                                <exclude reference="XCs-BE-BxF"/>
+                            </mask>
+                        </variation>
+                        <variation key="widthClass=compact">
+                            <mask key="subviews">
+                                <include reference="Yce-rt-x2J"/>
+                            </mask>
+                            <mask key="constraints">
+                                <include reference="KR2-sh-YQv"/>
+                                <include reference="Nc7-GH-maQ"/>
+                                <include reference="Ueu-cP-ohv"/>
+                                <include reference="XCs-BE-BxF"/>
+                            </mask>
+                        </variation>
                     </view>
                     <connections>
                         <outlet property="flingView" destination="UPU-gz-0AO" id="v4q-43-JXi"/>
@@ -42,7 +84,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="340" y="364"/>
+            <point key="canvasLocation" x="339" y="364"/>
         </scene>
     </scenes>
 </document>

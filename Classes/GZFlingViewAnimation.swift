@@ -8,6 +8,8 @@
 
 import UIKit
 
+public typealias GZFlingViewAnimationGestureInfo = (gestureRecognizer:UIPanGestureRecognizer?, translation: CGPoint, velocity: CGPoint)
+
 enum GZFlingViewAnimationState:Int{
     case Init = 0
 }
@@ -20,30 +22,30 @@ let kGZFlingViewAnimationDuration:NSTimeInterval = 0.2
 
 public protocol Animation {
     
-    var flingView:GZFlingView! { set get }
-    var beginLocation:CGPoint { set get }
+    var flingView:GZFlingView! { get }
+    var beginLocation:CGPoint { get }
     
     var expectedMinSize:Int { get }
     
-    func gesturePanning(gesture gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!, translation:CGPoint)
-    func willBeginGesture(gesture gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!)
-    func didEndGesture(gesture gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!)
+    func gesturePanning(gestureInfo gestureInfo:GZFlingViewAnimationGestureInfo, currentNode:GZFlingNode!)
+    func willBeginGesture(gestureInfo gestureInfo:GZFlingViewAnimationGestureInfo, currentNode:GZFlingNode!)
+    func didEndGesture(gestureInfo gestureInfo:GZFlingViewAnimationGestureInfo, currentNode:GZFlingNode!)
     
     func prepare(node node:GZFlingNode)
     func willAppear(node node:GZFlingNode!)
     func didAppear(node node:GZFlingNode!)
     
     
-    func shouldCancel(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint)->Bool
-    func showChoosenAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint, completionHandler:((finished:Bool)->Void))
-    func showCancelAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint,completionHandler:((finished:Bool)->Void))
+    func shouldCancel(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, gestureInfo:GZFlingViewAnimationGestureInfo)->Bool
+    func showChoosenAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, gestureInfo:GZFlingViewAnimationGestureInfo, completionHandler:((finished:Bool)->Void))
+    func showRestoreAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, gestureInfo:GZFlingViewAnimationGestureInfo,completionHandler:((finished:Bool)->Void))
     
 }
 
 public class GZFlingViewAnimation : Animation {
     
-    public var flingView:GZFlingView!
-    public var beginLocation:CGPoint = CGPoint()
+    public internal(set) var flingView:GZFlingView!
+    public internal(set) var beginLocation:CGPoint = CGPoint()
     
     init(){
         
@@ -53,9 +55,9 @@ public class GZFlingViewAnimation : Animation {
         return 0
     }
     
-    public func gesturePanning(gesture gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!, translation:CGPoint){}
-    public func willBeginGesture(gesture gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!){}
-    public func didEndGesture(gesture gesture:UIPanGestureRecognizer, currentNode:GZFlingNode!){}
+    public func gesturePanning(gestureInfo gestureInfo:GZFlingViewAnimationGestureInfo, currentNode:GZFlingNode!){}
+    public func willBeginGesture(gestureInfo gestureInfo:GZFlingViewAnimationGestureInfo, currentNode:GZFlingNode!){}
+    public func didEndGesture(gestureInfo gestureInfo:GZFlingViewAnimationGestureInfo, currentNode:GZFlingNode!){}
     
     
     public func prepare(node node:GZFlingNode){
@@ -71,9 +73,9 @@ public class GZFlingViewAnimation : Animation {
     }
     
     
-    public func shouldCancel(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint)->Bool{return true}
-    public func showChoosenAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    public func shouldCancel(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, gestureInfo:GZFlingViewAnimationGestureInfo)->Bool{return true}
+    public func showChoosenAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, gestureInfo:GZFlingViewAnimationGestureInfo, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
     
-    public func showCancelAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, translation:CGPoint,completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
+    public func showRestoreAnimation(direction direction:GZFlingViewSwipingDirection, currentNode:GZFlingNode?, gestureInfo:GZFlingViewAnimationGestureInfo, completionHandler:((finished:Bool)->Void)){completionHandler(finished: true)}
     
 }

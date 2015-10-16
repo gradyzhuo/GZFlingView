@@ -8,6 +8,48 @@
 
 import UIKit
 
+public enum GZFlingCarryingViewTemplateType{
+    case Xib(UINib)
+    case Class(GZFlingCarryingView.Type)
+}
+
+public class GZFlingCarryingViewTemplate:NSObject {
+    
+    public internal(set) var type:GZFlingCarryingViewTemplateType
+    
+    public init(cls: GZFlingCarryingView.Type){
+        self.type = .Class(cls)
+    }
+    
+    public init(nibName: String, inBundle bundle:NSBundle!){
+        self.type = .Xib(UINib(nibName: nibName, bundle: bundle))
+    }
+    
+    public init(xib: UINib){
+        self.type = .Xib(xib)
+    }
+    
+    internal func instantiate() -> GZFlingCarryingView? {
+        
+        if case let .Class(cls) = self.type {
+            let carryingView = cls.init()
+            return carryingView
+        }
+        
+        if case let .Xib(xib) = self.type {
+            let views = xib.instantiateWithOwner(nil, options: nil)
+            if let carryingView = views.first as? GZFlingCarryingView {
+                return carryingView
+            }else{
+                return nil
+            }
+        }
+        
+        return nil
+        
+    }
+}
+
 public class GZFlingCarryingView: UIView {
     
     public var flingIndex:Int = 0
